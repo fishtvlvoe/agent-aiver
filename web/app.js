@@ -89,7 +89,11 @@ export async function loginWithLiff(liffId, { requiredRole } = {}) {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ idToken }),
   });
-  if (!res.ok) return { ok: false, reason: "auth-failed", status: res.status };
+  if (!res.ok) {
+    let userId = null;
+    try { userId = (await liff.getProfile()).userId; } catch { /* 忽略 */ }
+    return { ok: false, reason: "auth-failed", status: res.status, userId };
+  }
   const { token, role } = await res.json();
   sessionStorage.setItem("sess_token", token);
   if (requiredRole && role !== requiredRole) return { ok: false, reason: "wrong-role", role };
