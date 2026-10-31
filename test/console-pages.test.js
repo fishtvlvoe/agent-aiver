@@ -1,5 +1,22 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+// 管理員一鍵進入店家：簽發 impersonatedBy session
+test("impersonate：管理員取得 store session，me 回 impersonatedBy", async () => {
+  const { handleConsole } = await import("../src/api/console.js");
+  const kv = makeFakeKv({ role: null });
+  kv.store.set("sess:admintok", JSON.stringify({ role: "admin", userId: "U-admin-1", name: "Fish", exp: Date.now() + 99999 }));
+  const db = makeFakeDb();
+  db.tenants.push({ id: "t1", slug: "lao-zhang", name: "老張", status: "active", admin_line_user_id: null, created_at: "2026-11-01" });
+  const req = new Request("http://x/api/console/tenants/lao-zhang/impersonate", { method: "POST", headers: { authorization: "Bearer admintok" } });
+  const res = await handleConsole(req, { DB: db, FORM_STATE: kv });
+  assert.equal(res.status, 200);
+  const { token, slug } = await res.json();
+  assert.equal(slug, "lao-zhang");
+  const sess = await kv.get(`sess:${token}`, "json");
+  assert.equal(sess.role, "store");
+  assert.equal(sess.impersonatedBy, "U-admin-1");
+});
+
 import { handleConsole } from "../src/api/console.js";
 import { handleLineEvents } from "../src/reply.js";
 

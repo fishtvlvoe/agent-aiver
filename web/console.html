@@ -238,6 +238,15 @@ const STATUS_BADGE = {
 };
 let adminTargetSlug = null;
 
+// 管理員一鍵進入店家（impersonate）：換 session → 開店家後台
+async function enterStore(slug) {
+  const res = await api(`/api/console/tenants/${slug}/impersonate`, { method: "POST" });
+  if (!res.ok) { toast("進入失敗，請重試"); return; }
+  const { token } = await res.json();
+  sessionStorage.setItem("sess_token", token);
+  location.href = "/admin.html";
+}
+
 async function loadTenants() {
   const { tenants } = await api("/api/console/tenants");
   const tbody = document.getElementById("tenant-table-body");
@@ -249,6 +258,7 @@ async function loadTenants() {
     const usageText = `${used.toLocaleString("en-US")} / 5,000`;
     const badge = STATUS_BADGE[t.status] ?? t.status;
     const toggleLabel = t.status === "disabled" ? "啟用" : "停用";
+    const enterBtn = `<button class="action-btn" onclick="enterStore('${t.slug}')">進入店家</button>`;
 
     const tr = document.createElement("tr");
     tr.innerHTML = `<td></td><td class="num"></td><td>${badge}</td><td class="num">${usageText}</td><td></td>`;
@@ -257,7 +267,8 @@ async function loadTenants() {
     const actions = tr.children[4];
     const btnAdmin = actionButton("開通管理員", () => openAdminDialog(t.slug));
     const btnToggle = actionButton(toggleLabel, (e) => toggleTenant(t.slug, e.currentTarget));
-    actions.append(btnAdmin, btnToggle);
+    const btnEnter = actionButton("進入店家", () => enterStore(t.slug));
+    actions.append(btnAdmin, btnEnter, btnToggle);
     tbody.appendChild(tr);
 
     const card = document.createElement("div");
@@ -271,6 +282,7 @@ async function loadTenants() {
     card.querySelectorAll(".meta")[0].textContent = `代號 ${t.slug}`;
     card.querySelector(".actions").append(
       actionButton("開通管理員", () => openAdminDialog(t.slug)),
+      actionButton("進入店家", () => enterStore(t.slug)),
       actionButton(toggleLabel, (e) => toggleTenant(t.slug, e.currentTarget)),
     );
     cards.appendChild(card);

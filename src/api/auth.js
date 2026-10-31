@@ -64,5 +64,6 @@ export async function handleMe(request, env) {
     slug: session.slug ?? null,
     userId: session.userId,
     name: session.name,
+    impersonatedBy: session.impersonatedBy ?? null,
   });
 }

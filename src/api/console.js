@@ -1,4 +1,5 @@
-import { requireAdmin } from "../lib/guard.js";
+import { requireAdmin, getBearerToken } from "../lib/guard.js";
+import { createSession, getSession } from "../lib/session.js";
 import { monthKeyTW, MONTHLY_LIMIT } from "../lib/month.js";
 
 // 平台預設模型設定：KV key，只存 baseUrl+model（平台 key 繼續用 env OPENAI_API_KEY）
@@ -22,6 +23,22 @@ export async function handleConsole(request, env) {
       .bind(monthKeyTW(new Date()))
       .all();
     return Response.json({ tenants: results ?? [] });
+  }
+
+
+  // 管理員一鍵進入店家：簽發 impersonated store session（supastarter impersonatedBy 模式）
+  const impersonate = path.match(/^\/api\/console\/tenants\/([^/]+)\/impersonate$/);
+  if (impersonate && request.method === "POST") {
+    const session = await getSession(env.FORM_STATE, getBearerToken(request));
+    const tenant = await env.DB.prepare("SELECT id, slug FROM tenants WHERE slug = ?")
+      .bind(decodeURIComponent(impersonate[1]))
+      .first();
+    if (!tenant) return Response.json({ error: "tenant not found" }, { status: 404 });
+    const sess = await createSession(env.FORM_STATE, {
+      role: "store", tenantId: tenant.id, slug: tenant.slug,
+      userId: session.userId, name: session.name, impersonatedBy: session.userId,
+    });
+    return Response.json({ token: sess.token, slug: tenant.slug });
   }
 
   // 開通店家管理員：UPDATE tenants.admin_line_user_id

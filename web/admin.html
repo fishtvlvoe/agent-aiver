@@ -17,6 +17,10 @@
   </div>
 </div>
 
+<div id="impersonation-bar" hidden style="background:var(--warning-bg,#fffbeb);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:0.875rem">
+  <span>⚠️ 管理員檢視模式（正在檢視店家：<strong id="impersonation-slug"></strong>）</span>
+  <button class="btn btn-secondary btn-sm" onclick="exitImpersonation()">返回中台</button>
+</div>
 <div id="app" hidden>
 <div class="drawer" id="drawer">
   <div class="drawer-mask" onclick="toggleDrawer(false)"></div>
@@ -247,10 +251,19 @@ if (!login.ok || !login.me?.slug) {
 } else {
   slug = login.me.slug;
   document.getElementById("app").hidden = false;
+  if (login.me.impersonatedBy) {
+    const bar = document.getElementById("impersonation-bar");
+    bar.hidden = false;
+    document.getElementById("impersonation-slug").textContent = slug;
+  }
   document.getElementById("webhook-url").value = `${location.origin}/webhook/${slug}`;
   refreshHandoffBadge(slug);
   refreshUsageChip();
   route();
+}
+async function exitImpersonation() {
+  sessionStorage.removeItem("sess_token");
+  location.href = "/console.html";
 }
 addEventListener("hashchange", route);
 
