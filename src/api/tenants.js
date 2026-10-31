@@ -1,5 +1,10 @@
-// POST /api/tenants —— 中台建立租戶（第一版無 auth，之後任務補）
+// POST /api/tenants —— 中台建立租戶（需 admin session；安全補丁：不再無驗證開放）
+import { requireAdmin } from "../lib/guard.js";
+
 export async function handleCreateTenant(request, env) {
+  const { response } = await requireAdmin(env, request);
+  if (response) return response;
+
   let body;
   try {
     body = await request.json();

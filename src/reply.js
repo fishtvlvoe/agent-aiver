@@ -58,7 +58,7 @@ async function safeReply(env, tenant, event, text, fetchImpl) {
   }
 }
 
-// 9.3 模型供應商解析：tenant 為 custom 時改用自訂 provider（優先），env providers 作備援
+// 9.3/問題 11 模型供應商解析順序：tenant custom > 平台設定（KV platform:model_settings）> env 預設
 async function resolveProviders(env, tenant, fetchImpl) {
   const providers = [];
   if (tenant.model_mode === "custom" && tenant.model_base_url && tenant.model_key_enc) {
@@ -71,6 +71,14 @@ async function resolveProviders(env, tenant, fetchImpl) {
         fetchImpl,
       }),
     );
+  } else if (env.FORM_STATE) {
+    // 平台預設：KV 只存 baseUrl+model，key 用平台 env OPENAI_API_KEY
+    const platform = await env.FORM_STATE.get("platform:model_settings", "json");
+    if (platform?.baseUrl && platform?.model && env.OPENAI_API_KEY) {
+      providers.push(
+        createOpenAIProvider({ baseUrl: platform.baseUrl, apiKey: env.OPENAI_API_KEY, model: platform.model, fetchImpl }),
+      );
+    }
   }
   providers.push(...providersFromEnv(env, fetchImpl));
   return providers;

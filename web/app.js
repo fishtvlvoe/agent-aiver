@@ -19,7 +19,11 @@ export function fmtTime(dateInput) {
 }
 
 // API 呼叫：自動帶 Bearer session token，非 2xx 拋出含 body 的 Error
-const API_BASE = location.hostname.includes("workers.dev") ? "" : "https://line-ai-saas.fishandy1213.workers.dev";
+// 同源（workers.dev 部署或 localhost 開發）直接用相對路徑；其餘（Pages 靜態）導向 API worker
+const API_BASE =
+  location.hostname.includes("workers.dev") || ["localhost", "127.0.0.1"].includes(location.hostname)
+    ? ""
+    : "https://line-ai-saas.fishandy1213.workers.dev";
 
 export async function api(path, { method = "GET", body } = {}) {
   const token = sessionStorage.getItem("sess_token");
@@ -76,7 +80,18 @@ export async function getLiffId() {
 
 // 登入流程（admin.html / console.html 共用）：
 // liff.init → idToken → POST /api/auth/liff → sessionStorage；LIFF 外回 false
+// 已有 session（重新整理/新分頁）先驗證沿用，不必每次都走 LIFF
 export async function loginWithLiff(liffId, { requiredRole } = {}) {
+  const existing = sessionStorage.getItem("sess_token");
+  if (existing) {
+    try {
+      const me = await api("/api/auth/me");
+      if (!requiredRole || me.role === requiredRole) return { ok: true, role: me.role, me };
+      return { ok: false, reason: "wrong-role", role: me.role };
+    } catch {
+      sessionStorage.removeItem("sess_token");
+    }
+  }
   if (!liffId || typeof liff === "undefined") return { ok: false, reason: "no-liff" };
   // withLoginOnExternalBrowser：電腦瀏覽器也能走 LINE 登入（授權後帶 token 跳回）
   await liff.init({ liffId, withLoginOnExternalBrowser: true });
