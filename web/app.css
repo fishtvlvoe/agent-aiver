@@ -302,3 +302,6 @@ tbody tr:hover { background: var(--background); }
   .card-list.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .card-list.two-col > * { margin-bottom: 0; }
 }
+
+/* hidden 屬性必須壓過 inline display（banner/gate 用 hidden 控制） */
+[hidden] { display: none !important; }
