@@ -36,6 +36,7 @@ export async function handleLiff(request, env, fetchImpl = fetch) {
   const userId = data.sub;
   const name = data.name ?? null;
   if (!userId) return Response.json({ error: "invalid idToken" }, { status: 401 });
+  console.log("[auth] idToken verified", JSON.stringify({ userId, name }));
 
   // 判斷身分：platform_admins → admin；tenants.admin_line_user_id → store；皆無 → 403
   const admin = await env.DB.prepare("SELECT line_user_id FROM platform_admins WHERE line_user_id = ?").bind(userId).first();
