@@ -78,9 +78,12 @@ export async function getLiffId() {
 // liff.init → idToken → POST /api/auth/liff → sessionStorage；LIFF 外回 false
 export async function loginWithLiff(liffId, { requiredRole } = {}) {
   if (!liffId || typeof liff === "undefined") return { ok: false, reason: "no-liff" };
-  await liff.init({ liffId });
+  // withLoginOnExternalBrowser：電腦瀏覽器也能走 LINE 登入（授權後帶 token 跳回）
+  await liff.init({ liffId, withLoginOnExternalBrowser: true });
   if (!liff.isLoggedIn()) {
-    liff.login();
+    // LIFF 外（電腦瀏覽器）：整頁導向 LINE 授權，回來後 URL fragment 由 liff.init 消化
+    const redirectUri = location.href.split("#")[0];
+    liff.login({ redirectUri });
     return { ok: false, reason: "redirecting" };
   }
   const idToken = liff.getIDToken();

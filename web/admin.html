@@ -239,6 +239,8 @@ if (!login.ok || !login.me?.slug) {
   const gate = document.getElementById("gate");
   gate.style.display = "flex";
   let msg = "店家後台目前僅支援 LINE 內開啟。";
+  if (login.reason === "no-liff") msg = "請使用 LINE 帳號登入。<br><br><a href='/admin.html' style='color:var(--primary);font-weight:600'>使用 LINE 登入 →</a>";
+  if (login.reason === "redirecting") msg = "正在前往 LINE 登入…";
   if (login.reason === "auth-failed") msg = `登入失敗（HTTP ${login.status}）。請聯絡平台管理員開通此 LINE 帳號的店家權限。${login.userId ? `<br><small style="color:var(--muted-foreground)">userId：${login.userId}</small>` : ""}`;
   if (login.reason === "wrong-role") msg = "此帳號是平台管理員，請從中台進入。";
   gate.querySelector("p:last-child").innerHTML = msg;

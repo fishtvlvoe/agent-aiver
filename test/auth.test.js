@@ -37,8 +37,12 @@ function makeFakeDb({ admins = [], tenantAdmins = {} } = {}) {
   };
 }
 
-const verifyOkFetch = (sub, name) => async (url) => {
-  assert.match(url, /^https:\/\/api\.line\.me\/oauth2\/v2\.1\/verify\?/);
+const verifyOkFetch = (sub, name) => async (url, options = {}) => {
+  assert.equal(url, "https://api.line.me/oauth2/v2.1/verify");
+  assert.equal(options.method, "POST");
+  const params = new URLSearchParams(options.body);
+  assert.equal(params.get("id_token"), "tok");
+  assert.equal(params.get("client_id"), "login-channel-id");
   return { status: 200, ok: true, json: async () => ({ sub, name }) };
 };
 const verifyFailFetch = async () => ({ status: 400, ok: false, json: async () => ({}) });

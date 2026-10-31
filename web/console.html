@@ -12,7 +12,7 @@
 <div id="gate" style="display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px;text-align:center">
   <div>
     <p style="font-size:1.125rem;font-weight:600;margin-bottom:8px" id="gate-title">請從 LINE 開啟</p>
-    <p style="color:var(--muted-foreground);font-size:0.875rem" id="gate-desc">平台中台僅供管理員使用。</p>
+    <p style="color:var(--muted-foreground);font-size:0.875rem" id="gate-desc">平台中台僅供管理員使用。<br><br><a href="/console.html" style="color:var(--primary);font-weight:600">使用 LINE 登入 →</a></p>
   </div>
 </div>
 
@@ -71,7 +71,7 @@ const liffId = await getLiffId();
 const login = await loginWithLiff(liffId, { requiredRole: "admin" });
 if (!login.ok) {
   if (login.reason === "wrong-role") showGate("無權限", "此帳號不是平台管理員。");
-  else showGate("請從 LINE 開啟", "平台中台僅供管理員使用。");
+  else showGate("請從 LINE 開啟", "平台中台僅供管理員使用。<br><br><a href="/console.html" style="color:var(--primary);font-weight:600">使用 LINE 登入 →</a>");
 } else {
   document.getElementById("app").hidden = false;
   loadOverview();

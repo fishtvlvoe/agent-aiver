@@ -13,12 +13,25 @@ export async function handleLiff(request, env, fetchImpl = fetch) {
   const { idToken } = body ?? {};
   if (!idToken) return Response.json({ error: "invalid body" }, { status: 400 });
   const clientId = env.LINE_LOGIN_CHANNEL_ID;
-  if (!clientId) return Response.json({ error: "LINE login channel not configured" }, { status: 500 });
+  console.log("[auth] liff login attempt", JSON.stringify({
+    hasClientId: !!clientId,
+    clientIdLen: clientId?.length,
+    clientIdTail: clientId ? String(clientId).slice(-4) : null,
+    idTokenLen: idToken?.length,
+  }));
 
   // 向 LINE 驗證 idToken，拿 sub（userId）與 name
-  const url = `https://api.line.me/oauth2/v2.1/verify?client_id=${encodeURIComponent(clientId)}&id_token=${encodeURIComponent(idToken)}`;
-  const lineRes = await fetchImpl(url);
-  if (!lineRes.ok) return Response.json({ error: "invalid idToken" }, { status: 401 });
+  // 2026-11 實測：GET + query 已停用（回 400 要求 access_token），必須 POST form
+  const lineRes = await fetchImpl("https://api.line.me/oauth2/v2.1/verify", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ id_token: idToken, client_id: String(clientId) }).toString(),
+  });
+  if (!lineRes.ok) {
+    const errBody = typeof lineRes.text === "function" ? await lineRes.text().catch(() => "") : "";
+    console.log("[auth] LINE verify failed", JSON.stringify({ status: lineRes.status, body: errBody.slice(0, 300) }));
+    return Response.json({ error: "invalid idToken", detail: errBody.slice(0, 200) }, { status: 401 });
+  }
   const data = await lineRes.json();
   const userId = data.sub;
   const name = data.name ?? null;
