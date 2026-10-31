@@ -106,24 +106,18 @@ dialog .dialog-actions { display: flex; gap: 12px; justify-content: flex-end; ma
       <!-- 模型 -->
       <section class="container page" id="page-model" hidden>
         <h1 class="page-title" style="font-size:1.5rem;font-weight:600;margin-bottom:20px">模型</h1>
-        <div class="card" style="max-width:640px">
-          <h2><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>平台預設模型</h2>
-          <p class="sub">店家個別設定優先於此。金鑰使用平台環境的金鑰，不在這裡儲存。</p>
-          <div class="field">
-            <label>Base URL</label>
-            <input id="platform-base-url" placeholder="https://api.openai.com/v1" style="font-family:'Fira Code',monospace;font-size:0.875rem">
-            <div class="error-text"></div>
-          </div>
-          <div class="field">
-            <label>模型名稱</label>
-            <input id="platform-model" placeholder="gpt-5.6-luna" style="font-family:'Fira Code',monospace;font-size:0.875rem">
-            <div class="error-text"></div>
-          </div>
-          <button class="btn btn-primary" id="btn-save-platform-model">
-            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>儲存
+        <p class="page-desc">平台預設模型（多組 failover，由上到下依序嘗試）。店家個別設定優先於此。</p>
+        <div id="platform-groups"></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn btn-secondary" id="btn-add-group">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新增一組
           </button>
-          <p class="error-text" id="platform-model-error" style="margin-top:8px"></p>
+          <button class="btn btn-primary" id="btn-save-platform-model">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>全部儲存
+          </button>
         </div>
+        <p class="error-text" id="platform-model-error" style="margin-top:8px"></p>
       </section>
 
       <!-- 用量 -->
@@ -356,23 +350,149 @@ document.getElementById("btn-tenant-ok").addEventListener("click", async () => {
   }
 });
 
-// ===== 模型 =====
-async function loadPlatformModel() {
-  const m = await api("/api/console/model-settings");
-  document.getElementById("platform-base-url").value = m.baseUrl ?? "";
-  document.getElementById("platform-model").value = m.model ?? "";
+// ===== 模型（問題 13：供應商選單＋多組 failover） =====
+// 注意：順序與 baseUrl 需與 src/lib/providers-catalog.js 保持一致
+const PROVIDERS = {
+  openai: { label: "OpenAI", baseUrl: "https://api.openai.com/v1" },
+  deepseek: { label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1" },
+  gemini: { label: "Gemini", baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai" },
+  groq: { label: "Groq", baseUrl: "https://api.groq.com/openai/v1" },
+  openrouter: { label: "OpenRouter", baseUrl: "https://openrouter.ai/api/v1" },
+  mirasim: { label: "mirasim（折扣）", baseUrl: null },
+  custom: { label: "自訂（手填 base URL）", baseUrl: null },
+};
+let groupSeq = 0;
+
+function groupCardHtml(seq) {
+  return `
+    <div class="card" data-group="${seq}" style="max-width:640px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <h2 style="flex:1;margin:0"><span class="group-no num"></span></h2>
+        <button class="btn btn-ghost btn-sm btn-danger-text btn-del-group" type="button">刪除</button>
+      </div>
+      <div class="field">
+        <label>供應商</label>
+        <select class="g-provider" style="width:100%;border:1px solid var(--border);border-radius:calc(var(--radius)*0.8);padding:10px 12px;font-size:0.9375rem;background:var(--card);color:var(--foreground)">
+          ${Object.entries(PROVIDERS).map(([k, p]) => `<option value="${k}">${p.label}</option>`).join("")}
+        </select>
+        <div class="hint g-provider-hint"></div>
+      </div>
+      <div class="field g-baseurl-field" hidden>
+        <label>Base URL（自訂）</label>
+        <input class="g-baseurl" placeholder="https://api.example.com/v1" style="font-family:'Fira Code',monospace;font-size:0.875rem">
+      </div>
+      <div class="field">
+        <label>API key</label>
+        <input type="password" class="g-apikey" autocomplete="off" placeholder="sk-...">
+        <div class="hint g-key-hint" hidden>目前金鑰：<span class="num g-key-mask"></span>（留空沿用）</div>
+      </div>
+      <div class="field">
+        <label>模型名稱</label>
+        <div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap">
+          <input class="g-model" list="g-model-list-${seq}" placeholder="例如 gpt-5.6-luna" style="flex:1;font-family:'Fira Code',monospace;font-size:0.875rem">
+          <button class="btn btn-secondary btn-fetch-models" type="button">從供應商拉取</button>
+        </div>
+        <datalist id="g-model-list-${seq}"></datalist>
+      </div>
+    </div>`;
 }
+
+function addGroupCard(group = {}) {
+  const seq = ++groupSeq;
+  const container = document.getElementById("platform-groups");
+  const wrap = document.createElement("div");
+  wrap.innerHTML = groupCardHtml(seq);
+  const card = wrap.firstElementChild;
+  container.appendChild(card);
+  card.querySelector(".group-no").textContent = `第 ${container.children.length} 組`;
+  const select = card.querySelector(".g-provider");
+  select.value = group.provider ?? "openai";
+  refreshGroupUi(card);
+  if (group.baseUrl) card.querySelector(".g-baseurl").value = group.baseUrl;
+  if (group.model) card.querySelector(".g-model").value = group.model;
+  if (group.apiKeyMask) {
+    card.querySelector(".g-key-hint").hidden = false;
+    card.querySelector(".g-key-mask").textContent = group.apiKeyMask;
+  }
+  select.addEventListener("change", () => refreshGroupUi(card));
+  card.querySelector(".btn-del-group").addEventListener("click", () => {
+    card.remove();
+    renumberGroups();
+  });
+  card.querySelector(".btn-fetch-models").addEventListener("click", () => fetchGroupModels(card));
+}
+
+function renumberGroups() {
+  [...document.querySelectorAll("#platform-groups [data-group]")].forEach((c, i) => {
+    c.querySelector(".group-no").textContent = `第 ${i + 1} 組`;
+  });
+}
+
+function refreshGroupUi(card) {
+  const key = card.querySelector(".g-provider").value;
+  card.querySelector(".g-baseurl-field").hidden = key !== "custom";
+  card.querySelector(".g-provider-hint").textContent =
+    key === "mirasim" ? "Base URL 由平台環境設定。" : key === "custom" ? "" : `Base URL：${PROVIDERS[key].baseUrl}`;
+}
+
+function groupBaseUrl(card) {
+  const key = card.querySelector(".g-provider").value;
+  return PROVIDERS[key]?.baseUrl ?? (key === "custom" ? card.querySelector(".g-baseurl").value.trim() : null);
+}
+
+async function fetchGroupModels(card) {
+  const baseUrl = groupBaseUrl(card);
+  const apiKey = card.querySelector(".g-apikey").value.trim();
+  const list = card.querySelector("datalist");
+  list.innerHTML = "";
+  if (!baseUrl || !apiKey) return;
+  try {
+    const res = await fetch(`${baseUrl.replace(/\/$/, "")}/models`, { headers: { authorization: `Bearer ${apiKey}` } });
+    if (!res.ok) throw new Error("拉取失敗，請確認金鑰");
+    const data = await res.json();
+    for (const m of data.data ?? []) {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      list.appendChild(opt);
+    }
+    toast(`已拉取 ${(data.data ?? []).length} 個模型`);
+  } catch { /* 紅字交由儲存驗證呈現 */ }
+}
+
+document.getElementById("btn-add-group").addEventListener("click", () => {
+  if (document.querySelectorAll("#platform-groups [data-group]").length >= 5) return; // 上限 5 組
+  addGroupCard();
+});
+
+async function loadPlatformModel() {
+  const { groups } = await api("/api/console/model-settings");
+  document.getElementById("platform-groups").innerHTML = "";
+  for (const g of groups.length ? groups : [{}]) addGroupCard(g);
+}
+
 document.getElementById("btn-save-platform-model").addEventListener("click", async () => {
   clearFieldErrors();
-  const baseUrl = document.getElementById("platform-base-url").value.trim();
-  const model = document.getElementById("platform-model").value.trim();
   const errEl = document.getElementById("platform-model-error");
   errEl.textContent = "";
-  if (!baseUrl) return showFieldError("platform-base-url", "請填 Base URL");
-  if (!model) return showFieldError("platform-model", "請填模型名稱");
+  const cards = [...document.querySelectorAll("#platform-groups [data-group]")];
+  if (cards.length === 0) {
+    errEl.style.display = "block";
+    errEl.textContent = "至少保留一組";
+    return;
+  }
+  const groups = cards.map((card) => {
+    const provider = card.querySelector(".g-provider").value;
+    return {
+      provider,
+      ...(provider === "custom" ? { baseUrl: card.querySelector(".g-baseurl").value.trim() } : {}),
+      ...(card.querySelector(".g-apikey").value.trim() ? { apiKey: card.querySelector(".g-apikey").value.trim() } : {}),
+      model: card.querySelector(".g-model").value.trim(),
+    };
+  });
   try {
-    await api("/api/console/model-settings", { method: "PUT", body: { baseUrl, model } });
+    await api("/api/console/model-settings", { method: "PUT", body: { groups } });
     toast("已儲存");
+    loadPlatformModel();
   } catch (err) {
     errEl.style.display = "block";
     errEl.textContent = err.message ?? "儲存失敗";

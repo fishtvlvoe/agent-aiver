@@ -1,22 +1,6 @@
-// 全站共用前端工具：API 呼叫（Bearer session）、toast、格式化
-// 注意：fmtMoney/fmtDate/fmtTime 與 src/lib/format.js 保持一致（那邊有單元測試）
-
-export function fmtMoney(n) {
-  const num = Math.round(Number(n) || 0);
-  return `NT$${num.toLocaleString("en-US")}`;
-}
-
-export function fmtDate(dateInput) {
-  const d = new Date(dateInput);
-  if (Number.isNaN(d.getTime())) return "";
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
-}
-
-export function fmtTime(dateInput) {
-  const d = new Date(dateInput);
-  if (Number.isNaN(d.getTime())) return "";
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
+// 全站共用前端工具：API 呼叫（Bearer session）、toast
+// fmtMoney/fmtDate/fmtTime 由 build 從 src/lib/format.js 產生到 web/fmt.js（單一來源，見 scripts/build.js）
+export { fmtMoney, fmtDate, fmtTime } from "./fmt.js";
 
 // API 呼叫：自動帶 Bearer session token，非 2xx 拋出含 body 的 Error
 // 同源（workers.dev 部署或 localhost 開發）直接用相對路徑；其餘（Pages 靜態）導向 API worker

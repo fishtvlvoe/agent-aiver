@@ -5,6 +5,7 @@ import { classifyOutcome } from "./lib/outcome.js";
 import { checkRateLimit } from "./lib/ratelimit.js";
 import { monthKeyTW, MONTHLY_LIMIT } from "./lib/month.js";
 import { unwrapSecret, resolveMasterPassword } from "./lib/crypto.js";
+import { resolveProviderBaseUrl } from "./lib/providers-catalog.js";
 
 export const HANDOFF_REPLY = "已幫您轉達，真人會盡快回覆";
 export const RATE_LIMITED_REPLY = "請稍等，我們盡快回覆";
@@ -58,26 +59,28 @@ async function safeReply(env, tenant, event, text, fetchImpl) {
   }
 }
 
-// 9.3/問題 11 模型供應商解析順序：tenant custom > 平台設定（KV platform:model_settings）> env 預設
+// 9.3/問題 11/13 模型供應商解析順序：tenant custom > 平台多組 failover 鍊 > env 預設
 async function resolveProviders(env, tenant, fetchImpl) {
   const providers = [];
-  if (tenant.model_mode === "custom" && tenant.model_base_url && tenant.model_key_enc) {
+  if (tenant.model_mode === "custom" && tenant.model_key_enc) {
+    // 問題 13：依 provider 解析 baseUrl（custom 用存的、mirasim 用 env、其餘對照表）
+    const baseUrl = resolveProviderBaseUrl(tenant.model_provider, tenant.model_base_url, env);
     const apiKey = await unwrapSecret(resolveMasterPassword(env), tenant.model_key_enc);
-    providers.push(
-      createOpenAIProvider({
-        baseUrl: tenant.model_base_url,
-        apiKey,
-        model: tenant.model_name,
-        fetchImpl,
-      }),
-    );
-  } else if (env.FORM_STATE) {
-    // 平台預設：KV 只存 baseUrl+model，key 用平台 env OPENAI_API_KEY
-    const platform = await env.FORM_STATE.get("platform:model_settings", "json");
-    if (platform?.baseUrl && platform?.model && env.OPENAI_API_KEY) {
+    if (baseUrl && apiKey) {
       providers.push(
-        createOpenAIProvider({ baseUrl: platform.baseUrl, apiKey: env.OPENAI_API_KEY, model: platform.model, fetchImpl }),
+        createOpenAIProvider({ baseUrl, apiKey, model: tenant.model_name, fetchImpl }),
       );
+    }
+  } else if (env.FORM_STATE) {
+    // 平台預設：多組 failover（第一組優先），key 為 wrapped 存 KV
+    const platform = await env.FORM_STATE.get("platform:model_settings", "json");
+    const groups = Array.isArray(platform) ? platform : [];
+    const password = resolveMasterPassword(env);
+    for (const g of groups) {
+      const baseUrl = resolveProviderBaseUrl(g.provider, g.baseUrl, env);
+      if (!baseUrl || !g.apiKeyEnc || !g.model) continue;
+      const apiKey = await unwrapSecret(password, g.apiKeyEnc);
+      providers.push(createOpenAIProvider({ baseUrl, apiKey, model: g.model, fetchImpl }));
     }
   }
   providers.push(...providersFromEnv(env, fetchImpl));

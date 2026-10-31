@@ -166,7 +166,12 @@
           </div>
           <div id="model-custom-fields" hidden>
             <div class="field">
-              <label>Base URL</label>
+              <label>供應商</label>
+              <select id="model-provider" class="provider-select" style="width:100%;border:1px solid var(--border);border-radius:calc(var(--radius)*0.8);padding:10px 12px;font-size:0.9375rem;background:var(--card);color:var(--foreground)"></select>
+              <div class="hint" id="model-provider-hint"></div>
+            </div>
+            <div class="field" id="model-baseurl-field" hidden>
+              <label>Base URL（自訂）</label>
               <input id="model-base-url" placeholder="https://api.example.com/v1" style="font-family:'Fira Code',monospace;font-size:0.875rem">
               <div class="error-text"></div>
             </div>
@@ -178,7 +183,11 @@
             </div>
             <div class="field">
               <label>模型名稱</label>
-              <input id="model-name" placeholder="例如 gpt-5.6-luna" style="font-family:'Fira Code',monospace;font-size:0.875rem">
+              <div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap">
+                <input id="model-name" list="model-name-list" placeholder="例如 gpt-5.6-luna" style="flex:1;font-family:'Fira Code',monospace;font-size:0.875rem">
+                <button class="btn btn-secondary" id="btn-fetch-models" type="button">從供應商拉取</button>
+              </div>
+              <datalist id="model-name-list"></datalist>
               <div class="error-text"></div>
             </div>
           </div>
@@ -430,13 +439,68 @@ async function refreshUsageChip() {
   } catch { /* 頂欄徽章失敗不影響 */ }
 }
 
-// ===== 模型設定 =====
+// ===== 模型設定（問題 13：供應商選單＋拉模型） =====
+// 注意：順序與 baseUrl 需與 src/lib/providers-catalog.js 保持一致
+const PROVIDERS = {
+  openai: { label: "OpenAI", baseUrl: "https://api.openai.com/v1" },
+  deepseek: { label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1" },
+  gemini: { label: "Gemini", baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai" },
+  groq: { label: "Groq", baseUrl: "https://api.groq.com/openai/v1" },
+  openrouter: { label: "OpenRouter", baseUrl: "https://openrouter.ai/api/v1" },
+  mirasim: { label: "mirasim（折扣）", baseUrl: null },
+  custom: { label: "自訂（手填 base URL）", baseUrl: null },
+};
+
+const providerSelect = document.getElementById("model-provider");
+providerSelect.innerHTML = Object.entries(PROVIDERS)
+  .map(([k, p]) => `<option value="${k}">${p.label}</option>`)
+  .join("");
+
+// 目前選擇的 provider 對外 baseUrl（前端視角；mirasim 由後端補，僅提示）
+function selectedProviderBaseUrl() {
+  const p = PROVIDERS[providerSelect.value];
+  return p?.baseUrl ?? (providerSelect.value === "custom" ? document.getElementById("model-base-url").value.trim() : null);
+}
+function refreshProviderUi() {
+  const key = providerSelect.value;
+  document.getElementById("model-baseurl-field").hidden = key !== "custom";
+  document.getElementById("model-provider-hint").textContent =
+    key === "mirasim" ? "Base URL 由平台環境設定，不需填寫。" : key === "custom" ? "" : `Base URL：${PROVIDERS[key].baseUrl}`;
+}
+providerSelect.addEventListener("change", refreshProviderUi);
+
+// 從供應商拉模型清單 → datalist
+document.getElementById("btn-fetch-models").addEventListener("click", async () => {
+  const baseUrl = selectedProviderBaseUrl();
+  const apiKey = document.getElementById("model-api-key").value.trim();
+  const list = document.getElementById("model-name-list");
+  list.innerHTML = "";
+  if (!baseUrl) return showFieldError("model-base-url", "請先填 Base URL");
+  if (!apiKey) return showFieldError("model-api-key", "請先填 API key 才能拉取模型");
+  try {
+    const res = await fetch(`${baseUrl.replace(/\/$/, "")}/models`, { headers: { authorization: `Bearer ${apiKey}` } });
+    if (!res.ok) throw new Error("拉取失敗，請確認金鑰");
+    const data = await res.json();
+    for (const m of data.data ?? []) {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      list.appendChild(opt);
+    }
+    toast(`已拉取 ${(data.data ?? []).length} 個模型`);
+  } catch (err) {
+    showFieldError("model-name", err.message ?? "拉取失敗");
+  }
+});
+
 async function loadModelSettings() {
   const m = await api(`/api/model-settings/${slug}`);
   document.querySelector(`input[name="model-mode"][value="${m.mode}"]`).checked = true;
   document.getElementById("model-custom-fields").hidden = m.mode !== "custom";
+  providerSelect.value = m.provider ?? "custom";
+  refreshProviderUi();
   document.getElementById("model-base-url").value = m.baseUrl ?? "";
   document.getElementById("model-name").value = m.model ?? "";
+  document.getElementById("model-api-key").value = "";
   const hint = document.getElementById("model-key-mask-hint");
   hint.hidden = !m.apiKeyMask;
   document.getElementById("model-key-mask").textContent = m.apiKeyMask ?? "";
@@ -455,13 +519,13 @@ document.getElementById("btn-save-model").addEventListener("click", async () => 
     if (mode === "platform") {
       await api(`/api/model-settings/${slug}`, { method: "PUT", body: { mode: "platform" } });
     } else {
-      const baseUrl = document.getElementById("model-base-url").value.trim();
+      const provider = providerSelect.value;
+      const baseUrl = provider === "custom" ? document.getElementById("model-base-url").value.trim() : undefined;
       const apiKey = document.getElementById("model-api-key").value.trim();
       const model = document.getElementById("model-name").value.trim();
-      if (!baseUrl) return showFieldError("model-base-url", "請填 Base URL");
-      if (!apiKey) return showFieldError("model-api-key", "請填 API key");
+      if (provider === "custom" && !baseUrl) return showFieldError("model-base-url", "請填 Base URL");
       if (!model) return showFieldError("model-name", "請填模型名稱");
-      await api(`/api/model-settings/${slug}`, { method: "PUT", body: { mode: "custom", baseUrl, apiKey, model } });
+      await api(`/api/model-settings/${slug}`, { method: "PUT", body: { mode: "custom", provider, ...(baseUrl ? { baseUrl } : {}), ...(apiKey ? { apiKey } : {}), model } });
     }
     toast("已儲存");
     loadModelSettings();

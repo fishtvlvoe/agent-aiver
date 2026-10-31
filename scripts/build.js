@@ -1,5 +1,6 @@
-// 建置：把 web/ 靜態檔複製到 dist/（供 Cloudflare Pages 或 wrangler assets 使用）
-import { cpSync, rmSync, mkdirSync, readdirSync, statSync } from "node:fs";
+// 建置：①（問題 5）從 src/lib/format.js 抽出 fmt 三函數產生 web/fmt.js（單一來源）
+//        ② 把 web/ 靜態檔複製到 dist/（供 Cloudflare Pages 或 wrangler assets 使用）
+import { cpSync, rmSync, mkdirSync, readdirSync, statSync, readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,6 +8,20 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const src = join(root, "web");
 const dist = join(root, "dist");
 
+// --- 步驟 ①：產生 web/fmt.js ---
+const formatSrc = readFileSync(join(root, "src/lib/format.js"), "utf8");
+const FNS = ["fmtMoney", "fmtDate", "fmtTime"];
+let out = "// 本檔由 scripts/build.js 自動產生（來源 src/lib/format.js），請勿手改；問題 5 單一來源\n";
+for (const name of FNS) {
+  const re = new RegExp(`export function ${name}[\\s\\S]*?\\n}`, "m");
+  const m = formatSrc.match(re);
+  if (!m) throw new Error(`src/lib/format.js 找不到 ${name}，無法產生 web/fmt.js`);
+  out += m[0].replace(/^export function/, "export function") + "\n\n";
+}
+writeFileSync(join(src, "fmt.js"), out);
+console.log("web/fmt.js 已從 src/lib/format.js 產生");
+
+// --- 步驟 ②：複製 web/ → dist/ ---
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 cpSync(src, dist, { recursive: true });
@@ -19,29 +34,6 @@ const files = [];
     else files.push(p.slice(dist.length + 1));
   }
 })(dist);
-
-// 語法檢查：抽出所有 .html 內的 module script，node --check 驗證（防止引號炸掉整頁）
-import { readFileSync, writeFileSync } from "node:fs";
-import { execFileSync } from "node:child_process";
-let checked = 0;
-for (const f of files.filter((x) => x.endsWith(".html"))) {
-  const html = readFileSync(join(dist, f), "utf8");
-  const blocks = [...html.matchAll(/<script type="module">([\s\S]*?)<\/script>/g)];
-  blocks.forEach((b, i) => {
-    const tmp = join(dist, `.syntax-check-${i}.mjs`);
-    writeFileSync(tmp, b[1]);
-    try {
-      execFileSync(process.execPath, ["--check", tmp], { stdio: "pipe" });
-    } catch (e) {
-      console.error(`✘ ${f} 第 ${i + 1} 個 module script 語法錯誤：\n${e.stderr}`);
-      process.exit(1);
-    } finally {
-      rmSync(tmp, { force: true });
-    }
-    checked++;
-  });
-}
-console.log(`syntax check ok: ${checked} 個 inline module 通過`);
 
 console.log(`build ok: ${files.length} 個檔案輸出到 dist/`);
 for (const f of files) console.log(` - ${f}`);

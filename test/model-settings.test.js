@@ -60,14 +60,14 @@ const modelsOkFetch = async (url, opts) => {
 const modelsFailFetch = async () => ({ status: 401, ok: false, json: async () => ({}) });
 
 test("9.3 GET 回 mode/baseUrl/model/apiKeyMask", async () => {
-  const db = makeFakeDb({ model_mode: "custom", model_base_url: "https://custom.example/v1", model_name: "cheap-model", model_key_mask: "••••1234" });
+  const db = makeFakeDb({ model_mode: "custom", model_provider: "custom", model_base_url: "https://custom.example/v1", model_name: "cheap-model", model_key_mask: "••••1234" });
   const res = await handleModelSettings(new Request("http://x/api/model-settings/store-a", { headers }), env(db), "store-a");
-  assert.deepEqual(await res.json(), { mode: "custom", baseUrl: "https://custom.example/v1", model: "cheap-model", apiKeyMask: "••••1234" });
+  assert.deepEqual(await res.json(), { mode: "custom", provider: "custom", baseUrl: "https://custom.example/v1", model: "cheap-model", apiKeyMask: "••••1234" });
 });
 
 test("9.3 PUT custom：驗證通過才寫入（enc+mask）", async () => {
   const db = makeFakeDb();
-  const res = await handleModelSettings(put({ mode: "custom", baseUrl: "https://custom.example/v1", apiKey: "custom-key-1234", model: "cheap-model" }), env(db), "store-a", modelsOkFetch);
+  const res = await handleModelSettings(put({ mode: "custom", provider: "custom", baseUrl: "https://custom.example/v1", apiKey: "custom-key-1234", model: "cheap-model" }), env(db), "store-a", modelsOkFetch);
   assert.equal(res.status, 200);
   const json = await res.json();
   assert.equal(json.mode, "custom");
@@ -80,7 +80,7 @@ test("9.3 PUT custom：驗證通過才寫入（enc+mask）", async () => {
 
 test("9.3 PUT custom：驗證失敗 400，不寫入", async () => {
   const db = makeFakeDb();
-  const res = await handleModelSettings(put({ mode: "custom", baseUrl: "https://bad.example/v1", apiKey: "wrong-key", model: "m" }), env(db), "store-a", modelsFailFetch);
+  const res = await handleModelSettings(put({ mode: "custom", provider: "custom", baseUrl: "https://bad.example/v1", apiKey: "wrong-key", model: "m" }), env(db), "store-a", modelsFailFetch);
   assert.equal(res.status, 400);
   assert.deepEqual(await res.json(), { error: "金鑰無效，請確認後重試" });
   assert.equal(db.ops.length, 0);
@@ -110,7 +110,7 @@ test("9.3 整合：tenant custom 時 chat 走自訂 baseUrl", async () => {
     if (url.includes("api.line.me")) return { status: 200, ok: true, json: async () => ({}) };
     return { status: 200, ok: true, json: async () => ({ choices: [{ message: { content: "ok" } }], usage: {} }) };
   };
-  const tenant = { id: "t-A", slug: "store-a", name: "A", model_mode: "custom", model_base_url: "https://custom.example/v1", model_name: "cheap-model", model_key_enc: db.row.model_key_enc };
+  const tenant = { id: "t-A", slug: "store-a", name: "A", model_mode: "custom", model_provider: "custom", model_base_url: "https://custom.example/v1", model_name: "cheap-model", model_key_enc: db.row.model_key_enc };
   const event = { type: "message", replyToken: "rt", source: { userId: "U1" }, message: { type: "text", text: "hi" } };
   await handleLineEvents({ DB: db, FORM_STATE: null, LINE_CHANNEL_SECRET: PASSWORD }, tenant, [event], { fetchImpl: mockFetch });
 

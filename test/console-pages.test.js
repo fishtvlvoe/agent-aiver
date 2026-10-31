@@ -92,7 +92,7 @@ const req = (method, path, body) =>
     headers: { authorization: "Bearer tok", ...(body ? { "content-type": "application/json" } : {}) },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
-const env = (db, kv) => ({ FORM_STATE: kv, DB: db, OPENAI_API_KEY: "platform-key" });
+const env = (db, kv) => ({ FORM_STATE: kv, DB: db, OPENAI_API_KEY: "platform-key", LINE_CHANNEL_SECRET: "dev-master" });
 
 // 問題 11-1：PATCH admin 開通店家管理員
 test("PATCH admin：開通後 tenants.admin_line_user_id 更新", async () => {
@@ -114,23 +114,27 @@ test("model-settings GET：預設 null；PUT 驗證通過才寫 KV", async () =>
   const db = makeFakeDb();
   const kv = makeFakeKv();
   const get1 = await handleConsole(req("GET", "/api/console/model-settings"), env(db, kv));
-  assert.deepEqual(await get1.json(), { baseUrl: null, model: null });
+  assert.deepEqual(await get1.json(), { groups: [] });
 
   // stub global fetch：/models 驗證
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (url, opts) => {
-    assert.equal(url, "https://platform.example/v1/models");
+    assert.equal(url, "https://api.openai.com/v1/models");
     assert.equal(opts.headers.authorization, "Bearer platform-key");
     return { status: 200, ok: true, json: async () => ({}) };
   };
   try {
-    const put = await handleConsole(req("PUT", "/api/console/model-settings", { baseUrl: "https://platform.example/v1", model: "gpt-5.6-luna" }), env(db, kv));
+    const put = await handleConsole(req("PUT", "/api/console/model-settings", { groups: [{ provider: "openai", model: "gpt-5.6-luna", apiKey: "platform-key" }] }), env(db, kv));
     assert.equal(put.status, 200);
   } finally {
     globalThis.fetch = realFetch;
   }
   const get2 = await handleConsole(req("GET", "/api/console/model-settings"), env(db, kv));
-  assert.deepEqual(await get2.json(), { baseUrl: "https://platform.example/v1", model: "gpt-5.6-luna" });
+  const g2 = await get2.json();
+  assert.equal(g2.groups.length, 1);
+  assert.equal(g2.groups[0].provider, "openai");
+  assert.equal(g2.groups[0].model, "gpt-5.6-luna");
+  assert.equal(g2.groups[0].apiKeyMask, "••••-key"); // "platform-key" 末四碼
 });
 
 test("model-settings PUT：驗證失敗 400 不寫入", async () => {
@@ -139,7 +143,7 @@ test("model-settings PUT：驗證失敗 400 不寫入", async () => {
   const realFetch = globalThis.fetch;
   globalThis.fetch = async () => ({ status: 500, ok: false, json: async () => ({}) });
   try {
-    const res = await handleConsole(req("PUT", "/api/console/model-settings", { baseUrl: "https://bad.example/v1", model: "m" }), env(db, kv));
+    const res = await handleConsole(req("PUT", "/api/console/model-settings", { groups: [{ provider: "custom", baseUrl: "https://bad.example/v1", model: "m", apiKey: "k" }] }), env(db, kv));
     assert.equal(res.status, 400);
   } finally {
     globalThis.fetch = realFetch;
@@ -162,23 +166,39 @@ test("GET usage：回 month + tenants[{slug,name,count,limit}]", async () => {
 });
 
 // 問題 11-5：provider 順序 tenant custom > 平台 KV > env
-test("resolveProviders 順序：平台 KV 設定優先於 env 預設", async () => {
+test("問題 13：平台多組 failover 鍊依序嘗試（壞組跳過用好組）", async () => {
   const db = { prepare: () => ({ bind: () => ({ async first() { return null; }, async all() { return { results: [] }; }, async run() {} }) }) };
-  const kv = makeFakeKv({ platformModel: { baseUrl: "https://platform.example/v1", model: "platform-model" } });
+  const kv = makeFakeKv();
   const calls = [];
   const mockFetch = async (url, opts) => {
     calls.push({ url, auth: opts.headers?.authorization });
     if (url.includes("api.line.me")) return { status: 200, ok: true, json: async () => ({}) };
+    if (opts.headers?.authorization === "Bearer bad-key") return { status: 500, ok: false, json: async () => ({}) };
     return { status: 200, ok: true, json: async () => ({ choices: [{ message: { content: "ok" } }], usage: {} }) };
   };
-  const env = { DB: db, FORM_STATE: kv, OPENAI_API_KEY: "platform-key", LINE_CHANNEL_ACCESS_TOKEN: "t" };
+  // 平台多組 failover：第一組壞、第二組好 → 應打到第二組
+  const enc = async (k) => (await import("../src/lib/crypto.js")).wrapSecret("dev-master", k);
+  const store = new Map();
+  store.set("sess:tok", JSON.stringify({ role: "store", tenantId: "t-A", userId: "Ua", name: "A", exp: Date.now() + 3600_000 }));
+  store.set("platform:model_settings", JSON.stringify([
+    { provider: "deepseek", model: "bad-model", apiKeyEnc: await enc("bad-key"), apiKeyMask: "••••d-key" },
+    { provider: "groq", model: "good-model", apiKeyEnc: await enc("good-key"), apiKeyMask: "••••d-key" },
+  ]));
+  const kv2 = {
+    async get(k, t) { const v = store.get(k); return t === "json" && v !== undefined ? JSON.parse(v) : v; },
+    async put() {},
+  };
+  const env = { DB: db, FORM_STATE: kv2, LINE_CHANNEL_SECRET: "dev-master", LINE_CHANNEL_ACCESS_TOKEN: "t" };
   const tenant = { id: "t-A", slug: "store-a", name: "A", model_mode: "platform" };
   const event = { type: "message", replyToken: "rt", source: { userId: "U1" }, message: { type: "text", text: "hi" } };
   await handleLineEvents(env, tenant, [event], { fetchImpl: mockFetch });
 
-  const aiCall = calls.find((c) => c.url.includes("chat/completions"));
-  assert.match(aiCall.url, /^https:\/\/platform\.example\/v1\/chat\/completions/); // 平台 KV 設定勝出
-  assert.equal(aiCall.auth, "Bearer platform-key"); // key 用平台 env key
+  const aiCalls = calls.filter((c) => c.url.includes("chat/completions"));
+  // deepseek 壞 key：5xx retry 一次（2 次）→ failover 到 groq（1 次），共 3 次
+  assert.equal(aiCalls.length, 3);
+  assert.match(aiCalls[0].url, /^https:\/\/api\.deepseek\.com\/v1\/chat\/completions/);
+  assert.match(aiCalls[2].url, /^https:\/\/api\.groq\.com\/openai\/v1\/chat\/completions/);
+  assert.equal(aiCalls[2].auth, "Bearer good-key");
 });
 
 // requireAdmin 不得略過

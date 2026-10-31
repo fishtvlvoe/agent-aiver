@@ -1,9 +1,20 @@
 import { requireAdmin, getBearerToken } from "../lib/guard.js";
 import { createSession, getSession } from "../lib/session.js";
 import { monthKeyTW, MONTHLY_LIMIT } from "../lib/month.js";
+import { wrapSecret, unwrapSecret, maskSecret, resolveMasterPassword } from "../lib/crypto.js";
+import { PROVIDERS, resolveProviderBaseUrl, inferProviderFromBaseUrl, probeProvider } from "../lib/providers-catalog.js";
 
-// 平台預設模型設定：KV key，只存 baseUrl+model（平台 key 繼續用 env OPENAI_API_KEY）
+// 平台預設模型設定：KV key，多組 failover 鍊（apiKeyEnc 為 wrapped，永不回傳明文）
 const PLATFORM_MODEL_KEY = "platform:model_settings";
+
+// 向後相容：舊單組 {baseUrl, model} → 陣列（provider 由 baseUrl 反推）
+function normalizePlatformGroups(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === "object" && raw.baseUrl && raw.model) {
+    return [{ provider: inferProviderFromBaseUrl(raw.baseUrl), model: raw.model }];
+  }
+  return [];
+}
 
 // /api/console/* —— 平台管理員中台 API
 export async function handleConsole(request, env) {
@@ -67,28 +78,57 @@ export async function handleConsole(request, env) {
     return Response.json({ ok: true, status: next });
   }
 
-  // 平台預設模型設定（GET/PUT）；PUT 先驗證 baseUrl 可達
+  // 平台預設模型設定（GET/PUT，問題 13 改多組 failover 鍊）：
+  // KV 存 [{provider, model, apiKeyEnc, apiKeyMask}]，第一組是預設；向後相容舊單組 {baseUrl, model}
   if (path === "/api/console/model-settings") {
     if (request.method === "GET") {
       const raw = await env.FORM_STATE.get(PLATFORM_MODEL_KEY, "json");
-      return Response.json({ baseUrl: raw?.baseUrl ?? null, model: raw?.model ?? null });
+      const groups = normalizePlatformGroups(raw);
+      return Response.json({
+        groups: groups.map(({ apiKeyEnc, ...rest }) => rest), // 不回傳 enc
+      });
     }
     if (request.method === "PUT") {
       const body = await request.json().catch(() => ({}));
-      const { baseUrl, model } = body ?? {};
-      if (!baseUrl || !model) return Response.json({ error: "invalid body" }, { status: 400 });
-      if (!env.OPENAI_API_KEY) return Response.json({ error: "platform key not configured" }, { status: 500 });
-      let probe;
-      try {
-        probe = await fetch(`${baseUrl.replace(/\/$/, "")}/models`, {
-          headers: { authorization: `Bearer ${env.OPENAI_API_KEY}` },
-        });
-      } catch {
-        return Response.json({ error: "baseUrl 驗證失敗，請確認後重試" }, { status: 400 });
+      const incoming = body?.groups;
+      if (!Array.isArray(incoming) || incoming.length === 0) {
+        return Response.json({ error: "invalid body（至少一組）" }, { status: 400 });
       }
-      if (!probe.ok) return Response.json({ error: "baseUrl 驗證失敗，請確認後重試" }, { status: 400 });
-      await env.FORM_STATE.put(PLATFORM_MODEL_KEY, JSON.stringify({ baseUrl, model }));
-      return Response.json({ ok: true, baseUrl, model });
+      const password = resolveMasterPassword(env);
+      if (!password) return Response.json({ error: "master key not configured" }, { status: 500 });
+      const previous = normalizePlatformGroups(await env.FORM_STATE.get(PLATFORM_MODEL_KEY, "json"));
+      const next = [];
+      for (const g of incoming) {
+        const { provider, model, apiKey } = g ?? {};
+        if (!provider || !PROVIDERS[provider] || !model) {
+          return Response.json({ error: "invalid group" }, { status: 400 });
+        }
+        const baseUrl = resolveProviderBaseUrl(provider, g.baseUrl, env);
+        if (!baseUrl) return Response.json({ error: "invalid baseUrl" }, { status: 400 });
+        // key：新 key 或沿用舊組（provider+model 相同）的 enc
+        let effectiveKey = apiKey;
+        let reused = null;
+        if (!effectiveKey) {
+          reused = previous.find((p) => p.provider === provider && p.model === model && p.apiKeyEnc);
+          if (!reused) return Response.json({ error: "invalid body（缺少 API key）" }, { status: 400 });
+          effectiveKey = await unwrapSecret(password, reused.apiKeyEnc);
+        }
+        // 每組儲存前都驗證（失敗整批不寫入）
+        if (!(await probeProvider(baseUrl, effectiveKey))) {
+          return Response.json({ error: `金鑰無效，請確認後重試（${PROVIDERS[provider].label}）` }, { status: 400 });
+        }
+        next.push({
+          provider,
+          model,
+          apiKeyEnc: reused?.apiKeyEnc ?? (await wrapSecret(password, effectiveKey)),
+          apiKeyMask: reused?.apiKeyMask ?? maskSecret(effectiveKey),
+        });
+      }
+      await env.FORM_STATE.put(PLATFORM_MODEL_KEY, JSON.stringify(next));
+      return Response.json({
+        ok: true,
+        groups: next.map(({ apiKeyEnc, ...rest }) => rest),
+      });
     }
   }
 
