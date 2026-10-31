@@ -12,14 +12,9 @@ export const RATE_LIMITED_REPLY = "請稍等，我們盡快回覆";
 export const MONTHLY_LIMITED_REPLY = "店家將盡快親自回覆您";
 const HANDOFF_KEYWORDS = /(真人|客服|轉接|人工)/;
 
-// 解析 tenant 的 LINE access token：D1 wrapped(enc) 優先，其次 per-tenant env，fallback 全域
-export async function resolveTenantToken(env, tenant) {
-  if (tenant.line_token_enc) {
-    const password = resolveMasterPassword(env);
-    return await unwrapSecret(password, tenant.line_token_enc);
-  }
-  return env[`LINE_TOKEN_${tenant.slug}`] ?? env.LINE_CHANNEL_ACCESS_TOKEN ?? null;
-}
+// 解析 tenant 的 LINE access token：共用實作在 src/lib/tenant-token.js（問題 12 抽出）
+import { resolveTenantToken } from "./lib/tenant-token.js";
+export { resolveTenantToken };
 
 // LINE Reply API 回覆（fetch 可注入以便測試）
 export async function replyToLine(env, tenant, replyToken, text, fetchImpl = fetch) {

@@ -6,6 +6,7 @@ import { handleCreateTenant } from "./api/tenants.js";
 import { handleFaqs } from "./api/faqs.js";
 import { handleConversations } from "./api/conversations.js";
 import { handleModelSettings } from "./api/model-settings.js";
+import { handleLineSettings, handleApplyWebhook } from "./api/line-settings.js";
 import { handleConsole } from "./api/console.js";
 import { handleConfig } from "./api/config.js";
 
@@ -68,6 +69,14 @@ export default {
     const bindMatch = path.match(/^\/api\/bind\/([^/]+)$/);
     if (request.method === "POST" && bindMatch) {
       return wrap(handleBind(request, env, decodeURIComponent(bindMatch[1])));
+    }
+    const lineSettingsMatch = path.match(/^\/api\/line-settings\/([^/]+)$/);
+    if (request.method === "GET" && lineSettingsMatch) {
+      return wrap(handleLineSettings(request, env, decodeURIComponent(lineSettingsMatch[1])));
+    }
+    const applyWebhookMatch = path.match(/^\/api\/line-settings\/([^/]+)\/apply-webhook$/);
+    if (request.method === "POST" && applyWebhookMatch) {
+      return wrap(handleApplyWebhook(request, env, decodeURIComponent(applyWebhookMatch[1])));
     }
     if (path.startsWith("/api/console/")) {
       return wrap(handleConsole(request, env));
