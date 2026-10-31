@@ -48,7 +48,7 @@
 <header class="topbar">
   <strong style="font-size:1.125rem">LINE AI 客服</strong>
   <span style="flex:1"></span>
-  <button class="btn btn-primary btn-sm" id="login-top">店家登入</button>
+  <button class="btn btn-primary btn-sm" id="login-top">登入</button>
 </header>
 
 <main>
@@ -96,7 +96,7 @@
 <footer class="landing-footer">LINE AI 客服 · 資料只存你的店家資料裡</footer>
 
 <div class="cta-bar">
-  <button class="btn btn-primary" id="login-bar">店家登入</button>
+  <button class="btn btn-primary" id="login-bar">登入</button>
 </div>
 
 <script type="module">
@@ -108,7 +108,7 @@ try {
 } catch { /* 後端未部署時維持 null */ }
 
 function openLogin() {
-  if (liffId) window.location.href = `https://liff.line.me/${liffId}`;
+  window.location.href = '/admin.html'; // 統一入口：LIFF 內外都走這，管理員會自動跳中台
 }
 for (const id of ["login-top", "login-hero", "login-bar"]) {
   document.getElementById(id).addEventListener("click", openLogin);
