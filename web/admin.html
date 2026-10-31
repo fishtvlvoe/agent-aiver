@@ -229,7 +229,12 @@ let editingFaqId = null;
 
 // 登入：LIFF → session；LIFF 外顯示提示頁
 const liffId = await getLiffId();
-const login = await loginWithLiff(liffId, { requiredRole: "store" });
+let login = await loginWithLiff(liffId, { requiredRole: "store" });
+// 管理員開後台 → 直接進中台（同一 LIFF 內導航，liff 仍可用）
+if (login.reason === "wrong-role" || login.role === "admin") {
+  location.replace("/console.html");
+  await new Promise(() => {});
+}
 if (!login.ok || !login.me?.slug) {
   const gate = document.getElementById("gate");
   gate.style.display = "flex";
