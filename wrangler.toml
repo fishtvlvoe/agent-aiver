@@ -8,9 +8,9 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "line-ai-saas-db"
-database_id = "ebf0fec0-f2c8-426a-b028-775a89d36585" # local 佔位 UUID，遠端建立後需替換
+database_id = "800d8c55-b6bd-478b-ac74-f799877e85e7"
 
 [[kv_namespaces]]
-binding = "FORM_STATE"
-id = "00000000000000000000000000000000"
-preview_id = "00000000000000000000000000000000"
+binding = "FORM_STATE" # 雲端用獨立 namespace（LINE_SAAS_STATE），與 bni 的同名空間區隔
+id = "e4f3651d09664c1d98dd97521e7b435f"
+preview_id = "5b4155118f5b49539b441fc5c0cbdd4e"

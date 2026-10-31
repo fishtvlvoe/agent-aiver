@@ -19,9 +19,11 @@ export function fmtTime(dateInput) {
 }
 
 // API 呼叫：自動帶 Bearer session token，非 2xx 拋出含 body 的 Error
+const API_BASE = location.hostname.includes("workers.dev") ? "" : "https://line-ai-saas.fishandy1213.workers.dev";
+
 export async function api(path, { method = "GET", body } = {}) {
   const token = sessionStorage.getItem("sess_token");
-  const res = await fetch(path, {
+  const res = await fetch(API_BASE + path, {
     method,
     headers: {
       ...(body !== undefined ? { "content-type": "application/json" } : {}),
@@ -67,7 +69,7 @@ export function toggleDrawer(open) {
 
 // 取得 LIFF ID（後端 /api/config，只回公開設定）
 export async function getLiffId() {
-  const res = await fetch("/api/config");
+  const res = await fetch(API_BASE + "/api/config");
   const data = await res.json().catch(() => ({}));
   return data.liffId ?? null;
 }
@@ -82,7 +84,7 @@ export async function loginWithLiff(liffId, { requiredRole } = {}) {
     return { ok: false, reason: "redirecting" };
   }
   const idToken = liff.getIDToken();
-  const res = await fetch("/api/auth/liff", {
+  const res = await fetch(API_BASE + "/api/auth/liff", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ idToken }),
