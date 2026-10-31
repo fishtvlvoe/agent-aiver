@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>平台中台 — LINE AI 客服</title>
+<link rel="stylesheet" href="app.css">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+
+<div id="gate" style="display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px;text-align:center">
+  <div>
+    <p style="font-size:1.125rem;font-weight:600;margin-bottom:8px" id="gate-title">請從 LINE 開啟</p>
+    <p style="color:var(--muted-foreground);font-size:0.875rem" id="gate-desc">平台中台僅供管理員使用。</p>
+  </div>
+</div>
+
+<div id="app" hidden>
+<div class="layout">
+  <aside class="sidebar">
+    <div style="font-weight:700;font-size:1.125rem;padding:8px 12px 16px">平台中台</div>
+    <ul class="drawer-nav" style="margin-top:0">
+      <li><a href="#" class="active"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>總覽</a></li>
+    </ul>
+  </aside>
+
+  <main class="content" style="padding:20px 16px">
+    <h1 class="page-title" style="font-size:1.5rem;font-weight:600;margin-bottom:20px">總覽 <span class="num" id="overview-month" style="font-size:0.875rem;color:var(--muted-foreground);font-weight:400"></span></h1>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="label"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>店家數</div>
+        <div class="value num" id="kpi-tenants">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>本月 AI 回覆</div>
+        <div class="value num" id="kpi-replies">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>平均/店</div>
+        <div class="value num" id="kpi-avg">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>待真人處理</div>
+        <div class="value num" id="kpi-handoffs" style="color:var(--warning)">—</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>店家</th><th>狀態</th><th>本月用量/上限</th><th>操作</th></tr></thead>
+        <tbody id="tenant-table-body"></tbody>
+      </table>
+    </div>
+    <div class="card-list" id="tenant-card-list"></div>
+  </main>
+</div>
+</div>
+
+<script type="module">
+import { api, getLiffId, loginWithLiff, fmtMoney } from "./app.js";
+
+function showGate(title, desc) {
+  document.getElementById("gate-title").textContent = title;
+  document.getElementById("gate-desc").textContent = desc;
+  document.getElementById("gate").style.display = "flex";
+}
+
+const liffId = await getLiffId();
+const login = await loginWithLiff(liffId, { requiredRole: "admin" });
+if (!login.ok) {
+  if (login.reason === "wrong-role") showGate("無權限", "此帳號不是平台管理員。");
+  else showGate("請從 LINE 開啟", "平台中台僅供管理員使用。");
+} else {
+  document.getElementById("app").hidden = false;
+  loadOverview();
+  loadTenants();
+}
+
+async function loadOverview() {
+  const o = await api("/api/console/overview");
+  document.getElementById("overview-month").textContent = o.month;
+  document.getElementById("kpi-tenants").textContent = o.tenantCount.toLocaleString("en-US");
+  document.getElementById("kpi-replies").textContent = o.monthAiReplies.toLocaleString("en-US");
+  document.getElementById("kpi-avg").textContent = o.tenantCount > 0 ? Math.round(o.monthAiReplies / o.tenantCount).toLocaleString("en-US") : "0";
+  document.getElementById("kpi-handoffs").textContent = o.pendingHandoffs.toLocaleString("en-US");
+  void fmtMoney; // 費用 KPI 待計費模組上線後啟用
+}
+
+const STATUS_BADGE = {
+  active: '<span class="badge badge-ok"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>啟用</span>',
+  bound: '<span class="badge badge-ok">啟用</span>',
+  disabled: '<span class="badge badge-off">停用</span>',
+  unbound: '<span class="badge badge-off">未綁定</span>',
+};
+
+async function loadTenants() {
+  const { tenants } = await api("/api/console/tenants");
+  const tbody = document.getElementById("tenant-table-body");
+  const cards = document.getElementById("tenant-card-list");
+  tbody.innerHTML = "";
+  cards.innerHTML = "";
+  for (const t of tenants) {
+    const used = t.month_count ?? 0;
+    const usageText = `${used.toLocaleString("en-US")} / 5,000`;
+    const toggleLabel = t.status === "disabled" ? "啟用" : "停用";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td></td><td>${STATUS_BADGE[t.status] ?? t.status}</td><td class="num">${usageText}</td><td></td>`;
+    tr.children[0].textContent = t.name;
+    const btn = document.createElement("button");
+    btn.className = "action-btn";
+    btn.textContent = toggleLabel;
+    btn.addEventListener("click", () => toggleTenant(t.slug, btn));
+    tr.children[3].appendChild(btn);
+    tbody.appendChild(tr);
+
+    const card = document.createElement("div");
+    card.className = "store-card";
+    card.innerHTML = `
+      <div class="row1"><span class="name"></span>${STATUS_BADGE[t.status] ?? t.status}</div>
+      <div class="meta num">本月 ${usageText}</div>
+      <div class="actions"></div>`;
+    card.querySelector(".name").textContent = t.name;
+    const btn2 = document.createElement("button");
+    btn2.className = "action-btn";
+    btn2.textContent = toggleLabel;
+    btn2.addEventListener("click", () => toggleTenant(t.slug, btn2));
+    card.querySelector(".actions").appendChild(btn2);
+    cards.appendChild(card);
+  }
+}
+
+async function toggleTenant(slug, btn) {
+  btn.disabled = true;
+  try {
+    await api(`/api/console/tenants/${slug}/toggle`, { method: "POST" });
+    loadTenants();
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>

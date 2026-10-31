@@ -1,0 +1,9 @@
+node_modules/
+.wrangler/
+dist/
+dev.db*
+.env
+.DS_Store
+.agent-brief/
+.spectra/
+docs/moltos/

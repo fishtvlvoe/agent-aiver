@@ -1,0 +1,16 @@
+name = "line-ai-saas"
+main = "src/index.js"
+# 本機 workerd 目前最新支援到 2026-10-30（最新 wrangler 4.156.0），任務單寫「今天 2026-10-31」無法啟動，改用 2026-10-30
+compatibility_date = "2026-10-30"
+compatibility_flags = ["nodejs_compat"]
+
+# --- D1 / KV bindings（任務 1.2） ---
+[[d1_databases]]
+binding = "DB"
+database_name = "line-ai-saas-db"
+database_id = "ebf0fec0-f2c8-426a-b028-775a89d36585" # local 佔位 UUID，遠端建立後需替換
+
+[[kv_namespaces]]
+binding = "FORM_STATE"
+id = "00000000000000000000000000000000"
+preview_id = "00000000000000000000000000000000"

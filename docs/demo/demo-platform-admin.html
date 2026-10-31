@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>平台中台 Demo — 店家管理總覽</title>
+<style>
+/* ===== DESIGN.md（opcosv2 版）語意 tokens ===== */
+:root {
+  --background: oklch(98.8% 0.003 106.5);
+  --foreground: oklch(15.3% 0.006 107.1);
+  --card: #ffffff;
+  --border: oklch(93% 0.007 106.5);
+  --muted: oklch(96.6% 0.005 106.5);
+  --muted-foreground: oklch(46.6% 0.025 107.3);
+  --primary: oklch(15.3% 0.006 107.1);
+  --primary-foreground: oklch(98.8% 0.003 106.5);
+  --secondary: oklch(96.6% 0.005 106.5);
+  --secondary-foreground: oklch(22.8% 0.013 107.4);
+  --success: oklch(46.6% 0.025 107.3);
+  --warning: oklch(39.4% 0.023 107.4);
+  --muted2: oklch(46.6% 0.025 107.3);
+  --radius: 0.625rem;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  background: var(--background); color: var(--foreground);
+  font-size: 0.9375rem; line-height: 1.5;
+}
+.num { font-family: 'Fira Code', monospace; font-variant-numeric: tabular-nums; }
+svg.icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+svg.icon-sm { width: 16px; height: 16px; }
+
+.sidebar { display: none; }
+.layout { min-height: 100vh; }
+@media (min-width: 1024px) {
+  .layout { display: flex; }
+  .sidebar {
+    display: block; width: 240px; flex-shrink: 0;
+    background: var(--card); border-right: 1px solid var(--border);
+    padding: 16px; position: sticky; top: 0; height: 100vh;
+  }
+}
+.sidebar .logo { font-weight: 700; font-size: 1.125rem; padding: 8px 12px 16px; }
+.sidebar ul { list-style: none; }
+.sidebar a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius);
+  color: var(--foreground); text-decoration: none;
+}
+.sidebar a.active { background: var(--muted); font-weight: 500; }
+
+.content { flex: 1; padding: 20px 16px; }
+@media (min-width: 1024px) { .content { padding: 32px; } }
+.page-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.02em; }
+
+/* KPI 卡：一張卡一件事 */
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+@media (min-width: 1024px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
+.kpi {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px;
+}
+.kpi .label { font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 6px; display:flex; align-items:center; gap:6px; }
+.kpi .value { font-size: 1.5rem; font-weight: 700; }
+@media (max-width: 639px) { .kpi .value { font-size: 1.25rem; } }
+
+/* 店家列表：電腦表格、手機卡片（1024px 為界） */
+table { width: 100%; border-collapse: collapse; background: var(--card);
+  border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow); font-size: 0.875rem;
+}
+th {
+  background: var(--muted); color: var(--muted-foreground);
+  font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+  text-align: left; padding: 10px 14px;
+}
+td { padding: 12px 14px; border-top: 1px solid var(--muted); }
+tbody tr:hover { background: var(--background); }
+.table-wrap { display: none; }
+@media (min-width: 1024px) { .table-wrap { display: block; } .card-list { display: none; } }
+
+.store-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 14px 16px; margin-bottom: 12px;
+}
+.store-card .row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.store-card .name { font-weight: 600; }
+.store-card .meta { font-size: 0.75rem; color: var(--muted-foreground); }
+.store-card .actions { display: flex; gap: 8px; margin-top: 10px; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  border-radius: 9999px; font-size: 0.75rem;
+  padding: 2px 10px; font-weight: 500; background: var(--muted);
+}
+.badge-ok { color: var(--success); }
+.badge-warn { color: var(--warning); }
+.badge-off { color: var(--muted-foreground); }
+
+.action-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--border); background: var(--card);
+  border-radius: var(--radius); padding: 6px 14px; min-height: 36px;
+  font-size: 0.875rem; cursor: pointer; color: var(--secondary-foreground);
+  font-family: inherit;
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">平台中台</div>
+    <ul>
+      <li><a href="#" class="active"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>總覽</a></li>
+      <li><a href="#"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>店家</a></li>
+      <li><a href="#"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>模型</a></li>
+      <li><a href="#"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>用量</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <h1 class="page-title">總覽</h1>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="label"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>店家數</div>
+        <div class="value num">12</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>本月 AI 回覆</div>
+        <div class="value num">38,204</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>本月 AI 費用</div>
+        <div class="value num">NT$260</div>
+      </div>
+      <div class="kpi">
+        <div class="label"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>待真人處理</div>
+        <div class="value num" style="color:var(--warning)">17</div>
+      </div>
+    </div>
+
+    <!-- 電腦表格 -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>店家</th><th>狀態</th><th>本月用量/上限</th><th>未命中</th><th>操作</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>老張牛肉麵</td>
+            <td><span class="badge badge-ok"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>啟用</span></td>
+            <td class="num">2,341 / 5,000</td>
+            <td class="num">4</td>
+            <td><button class="action-btn">詳情</button></td>
+          </tr>
+          <tr>
+            <td>小米美髮沙龍</td>
+            <td><span class="badge badge-warn">即將超限</span></td>
+            <td class="num">4,890 / 5,000</td>
+            <td class="num">12</td>
+            <td><button class="action-btn">詳情</button></td>
+          </tr>
+          <tr>
+            <td>海角民宿</td>
+            <td><span class="badge badge-off">停用</span></td>
+            <td class="num">0 / 5,000</td>
+            <td class="num">—</td>
+            <td><button class="action-btn">啟用</button></td>
+          </tr>
+          <tr>
+            <td>阿明咖啡</td>
+            <td><span class="badge badge-ok">啟用</span></td>
+            <td class="num">812 / 5,000</td>
+            <td class="num">1</td>
+            <td><button class="action-btn">詳情</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 手機卡片 -->
+    <div class="card-list">
+      <div class="store-card">
+        <div class="row1">
+          <span class="name">老張牛肉麵</span>
+          <span class="badge badge-ok">啟用</span>
+        </div>
+        <div class="meta num">本月 2,341 / 5,000 · 未命中 4</div>
+        <div class="actions"><button class="action-btn">詳情</button></div>
+      </div>
+      <div class="store-card">
+        <div class="row1">
+          <span class="name">小米美髮沙龍</span>
+          <span class="badge badge-warn">即將超限</span>
+        </div>
+        <div class="meta num">本月 4,890 / 5,000 · 未命中 12</div>
+        <div class="actions"><button class="action-btn">詳情</button></div>
+      </div>
+      <div class="store-card">
+        <div class="row1">
+          <span class="name">海角民宿</span>
+          <span class="badge badge-off">停用</span>
+        </div>
+        <div class="meta">本月無用量</div>
+        <div class="actions"><button class="action-btn">啟用</button></div>
+      </div>
+      <div class="store-card">
+        <div class="row1">
+          <span class="name">阿明咖啡</span>
+          <span class="badge badge-ok">啟用</span>
+        </div>
+        <div class="meta num">本月 812 / 5,000 · 未命中 1</div>
+        <div class="actions"><button class="action-btn">詳情</button></div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

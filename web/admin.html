@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>店家後台 — LINE AI 客服</title>
+<link rel="stylesheet" href="app.css">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+
+<!-- LIFF 外或登入失敗的提示頁 -->
+<div id="gate" style="display:none;min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px;text-align:center">
+  <div>
+    <p style="font-size:1.125rem;font-weight:600;margin-bottom:8px">請從 LINE 開啟</p>
+    <p style="color:var(--muted-foreground);font-size:0.875rem">店家後台目前僅支援 LINE 內開啟。</p>
+  </div>
+</div>
+
+<div id="app" hidden>
+<div class="drawer" id="drawer">
+  <div class="drawer-mask" onclick="toggleDrawer(false)"></div>
+  <div class="drawer-panel">
+    <strong>店家後台</strong>
+    <ul class="drawer-nav">
+      <div class="drawer-group">機器人</div>
+      <li><a href="#knowledge" data-page="knowledge"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>知識庫</a></li>
+      <li><a href="#model" data-page="model"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>模型</a></li>
+      <div class="drawer-group">對話</div>
+      <li><a href="#conversations" data-page="conversations"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>對話紀錄</a></li>
+      <li><a href="#conversations?status=handoff" data-page="conversations"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>待真人處理 <span class="badge-dot handoff-count" hidden>0</span></a></li>
+      <div class="drawer-group">系統</div>
+      <li><a href="#bind" data-page="bind"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>綁定設定</a></li>
+      <li><a href="#usage" data-page="usage"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>用量</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div style="font-weight:700;font-size:1.125rem;padding:8px 12px 16px">店家後台</div>
+    <ul class="drawer-nav" style="margin-top:0">
+      <div class="drawer-group">機器人</div>
+      <li><a href="#knowledge" data-page="knowledge"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>知識庫</a></li>
+      <li><a href="#model" data-page="model"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>模型</a></li>
+      <div class="drawer-group">對話</div>
+      <li><a href="#conversations" data-page="conversations"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>對話紀錄</a></li>
+      <li><a href="#conversations?status=handoff" data-page="conversations"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>待真人處理 <span class="badge-dot handoff-count" hidden>0</span></a></li>
+      <div class="drawer-group">系統</div>
+      <li><a href="#bind" data-page="bind"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>綁定設定</a></li>
+      <li><a href="#usage" data-page="usage"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>用量</a></li>
+    </ul>
+  </aside>
+
+  <div class="content">
+    <header class="topbar">
+      <button class="icon-btn hamburger" onclick="toggleDrawer(true)" aria-label="選單">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <h1 id="page-title">知識庫</h1>
+      <span class="usage-chip"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>本月 <span class="num" id="chip-usage">—</span></span>
+    </header>
+
+    <main class="main-with-nav">
+      <!-- 知識庫 -->
+      <section class="container page" id="page-knowledge">
+        <p class="page-desc">AI 只依這裡的資料回答客人。寫得越清楚，答得越準。</p>
+        <button class="btn btn-primary" id="btn-new-faq">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          新增 FAQ
+        </button>
+        <div style="height:16px"></div>
+        <div id="faq-list"></div>
+      </section>
+
+      <!-- 對話紀錄 -->
+      <section class="container page" id="page-conversations" hidden>
+        <div class="filter-tabs" id="conv-tabs">
+          <button class="filter-tab active" data-status="all">全部</button>
+          <button class="filter-tab" data-status="handoff"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>待真人</button>
+          <button class="filter-tab" data-status="missed"><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>未命中</button>
+        </div>
+        <div class="card-list two-col" id="conv-card-list"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>客人</th><th>客人訊息</th><th>狀態</th><th>時間</th></tr></thead>
+            <tbody id="conv-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 綁定設定 -->
+      <section class="container page" id="page-bind" hidden>
+        <div class="card">
+          <div class="status-line" id="bind-status-line">
+            <span class="status-dot dot-bad" id="bind-dot"></span>
+            <strong id="bind-status-text" style="color:var(--muted-foreground)">尚未綁定</strong>
+          </div>
+          <p class="sub" style="margin:8px 0 0">綁定後客人傳訊會自動回覆。</p>
+        </div>
+
+        <div class="card">
+          <h2><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Webhook 網址</h2>
+          <p class="sub">貼到 LINE Developers 的 Webhook URL。</p>
+          <div class="url-row">
+            <input readonly id="webhook-url" value="">
+            <button class="btn btn-secondary" id="btn-copy-url"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>複製</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>LINE 金鑰</h2>
+          <p class="sub">換帳號或重設 channel 時，重新貼上即可。</p>
+          <div class="field">
+            <label>Channel secret</label>
+            <input type="password" id="bind-secret" autocomplete="off">
+            <div class="error-text"></div>
+          </div>
+          <div class="field">
+            <label>Channel access token</label>
+            <input type="password" id="bind-token" autocomplete="off">
+            <div class="hint">只存你的店家資料裡，平台管理員也看不到明文。</div>
+            <div class="error-text"></div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="btn-save-keys"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>驗證並儲存</button>
+          </div>
+          <p class="error-text" id="bind-error" style="margin-top:8px"></p>
+        </div>
+
+        <div class="card">
+          <h2><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>怎麼拿到金鑰？</h2>
+          <ol class="steps">
+            <li><details><summary>建立官方帳號</summary><div class="step-body">到 LINE Official Account Manager 建立官方帳號，開啟 Messaging API。</div></details></li>
+            <li><details><summary>複製 Channel secret</summary><div class="step-body">進 LINE Developers Console → 你的 Channel → Basic settings 複製 Channel secret。</div></details></li>
+            <li><details><summary>產生 Channel access token</summary><div class="step-body">切到 Messaging API 分頁，按 Issue 產生 Channel access token。</div></details></li>
+            <li><details><summary>調整回覆設定</summary><div class="step-body">關閉「自動回覆訊息」、開啟「Webhook」、關閉「Webhook redelivery」。</div></details></li>
+            <li><details><summary>貼上 Webhook 網址</summary><div class="step-body">把上方 Webhook 網址貼到 Webhook URL，按 Verify。</div></details></li>
+            <li><details><summary>完成驗證</summary><div class="step-body">回到這個頁面按「驗證並儲存」，燈號變綠就完成了。</div></details></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 用量 -->
+      <section class="container page" id="page-usage" hidden>
+        <div class="card">
+          <h2><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>本月 AI 回覆用量</h2>
+          <p class="sub"><span class="num" id="usage-count">—</span> / <span class="num" id="usage-limit">5,000</span></p>
+          <div class="progress-track"><div class="progress-fill" id="usage-bar" style="width:0%"></div></div>
+          <p class="error-text" id="usage-over" style="display:none;color:var(--destructive);font-size:0.875rem">已達本月上限，AI 暫停回覆，店家會親自回覆客人。</p>
+        </div>
+      </section>
+
+      <!-- 模型設定 -->
+      <section class="container page" id="page-model" hidden>
+        <div class="card">
+          <h2><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>模型供應商</h2>
+          <p class="sub">預設使用平台提供的模型；也可以換成你自己的 OpenAI 相容供應商。</p>
+          <div class="field">
+            <label><input type="radio" name="model-mode" value="platform" checked> 平台預設</label>
+            <label><input type="radio" name="model-mode" value="custom"> 自訂供應商</label>
+          </div>
+          <div id="model-custom-fields" hidden>
+            <div class="field">
+              <label>Base URL</label>
+              <input id="model-base-url" placeholder="https://api.example.com/v1" style="font-family:'Fira Code',monospace;font-size:0.875rem">
+              <div class="error-text"></div>
+            </div>
+            <div class="field">
+              <label>API key</label>
+              <input type="password" id="model-api-key" autocomplete="off" placeholder="sk-...">
+              <div class="hint" id="model-key-mask-hint" hidden>目前金鑰：<span class="num" id="model-key-mask"></span>（留空表示不修改）</div>
+              <div class="error-text"></div>
+            </div>
+            <div class="field">
+              <label>模型名稱</label>
+              <input id="model-name" placeholder="例如 gpt-5.6-luna" style="font-family:'Fira Code',monospace;font-size:0.875rem">
+              <div class="error-text"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="btn-save-model"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>儲存</button>
+            <button class="btn btn-secondary" id="btn-reset-model">清空回預設</button>
+          </div>
+          <p class="error-text" id="model-error" style="margin-top:8px"></p>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <a href="#knowledge" data-page="knowledge"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>知識庫</a>
+      <a href="#conversations" data-page="conversations"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>對話</a>
+      <a href="#usage" data-page="usage"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>用量</a>
+      <a href="#bind" data-page="bind"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>設定</a>
+    </nav>
+  </div>
+</div>
+</div>
+
+<!-- FAQ 全螢幕編輯頁 -->
+<div class="editor-page" id="faq-editor">
+  <div class="container">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button class="icon-btn" id="btn-editor-back"><svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+      <h2 style="flex:1;font-size:1.125rem" id="editor-title">新增 FAQ</h2>
+    </div>
+    <div class="field">
+      <label>問題（客人會怎麼問）</label>
+      <input id="faq-question" placeholder="例如：運費怎麼算？">
+      <div class="hint">可以只寫一種問法，AI 會舉一反三</div>
+    </div>
+    <div class="field">
+      <label>答案</label>
+      <textarea id="faq-answer" placeholder="寫給客人的完整回答"></textarea>
+      <div class="hint">價格、時間請寫確定數字，AI 不會自己編</div>
+    </div>
+    <button class="btn btn-primary" id="btn-save-faq" style="width:100%">儲存</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>已儲存</span></div>
+
+<script type="module">
+import { api, toast, showFieldError, clearFieldErrors, toggleDrawer, getLiffId, loginWithLiff, refreshHandoffBadge, fmtDate, fmtTime } from "./app.js";
+
+const PAGES = { knowledge: "知識庫", conversations: "對話紀錄", bind: "綁定設定", usage: "用量", model: "模型" };
+let slug = null;
+let editingFaqId = null;
+
+// 登入：LIFF → session；LIFF 外顯示提示頁
+const liffId = await getLiffId();
+const login = await loginWithLiff(liffId, { requiredRole: "store" });
+if (!login.ok || !login.me?.slug) {
+  document.getElementById("gate").style.display = "flex";
+} else {
+  slug = login.me.slug;
+  document.getElementById("app").hidden = false;
+  document.getElementById("webhook-url").value = `${location.origin}/webhook/${slug}`;
+  refreshHandoffBadge(slug);
+  refreshUsageChip();
+  route();
+}
+addEventListener("hashchange", route);
+
+function route() {
+  const hash = location.hash.replace(/^#/, "") || "knowledge";
+  const [page, query] = hash.split("?");
+  const name = PAGES[page] ? page : "knowledge";
+  document.querySelectorAll(".page").forEach((s) => (s.hidden = s.id !== `page-${name}`));
+  document.getElementById("page-title").textContent = PAGES[name];
+  document.querySelectorAll("[data-page]").forEach((a) => a.classList.toggle("active", a.dataset.page === name));
+  toggleDrawer(false);
+  if (name === "knowledge") loadFaqs();
+  if (name === "conversations") {
+    const params = new URLSearchParams(query ?? "");
+    const status = params.get("status") ?? "all";
+    setConvTab(status);
+    loadConversations(status);
+  }
+  if (name === "bind") loadBindStatus();
+  if (name === "usage") loadUsage();
+  if (name === "model") loadModelSettings();
+}
+
+// ===== 知識庫 =====
+async function loadFaqs() {
+  const { faqs } = await api(`/api/faqs/${slug}`);
+  const list = document.getElementById("faq-list");
+  list.innerHTML = "";
+  for (const f of faqs) {
+    const card = document.createElement("div");
+    card.className = "faq-card";
+    card.innerHTML = `
+      <div class="faq-q"></div>
+      <div class="faq-a"></div>
+      <div class="faq-actions">
+        <button class="btn btn-secondary btn-sm"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>編輯</button>
+        <button class="btn btn-ghost btn-sm btn-danger-text"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>刪除</button>
+      </div>`;
+    card.querySelector(".faq-q").textContent = f.question;
+    card.querySelector(".faq-a").textContent = f.answer;
+    const [editBtn, delBtn] = card.querySelectorAll("button");
+    editBtn.addEventListener("click", () => openEditor(f));
+    delBtn.addEventListener("click", async () => {
+      await api(`/api/faqs/${slug}/${f.id}`, { method: "DELETE" });
+      toast("已刪除");
+      loadFaqs();
+    });
+    list.appendChild(card);
+  }
+}
+
+function openEditor(faq = null) {
+  editingFaqId = faq?.id ?? null;
+  document.getElementById("editor-title").textContent = faq ? "編輯 FAQ" : "新增 FAQ";
+  document.getElementById("faq-question").value = faq?.question ?? "";
+  document.getElementById("faq-answer").value = faq?.answer ?? "";
+  document.getElementById("faq-editor").classList.add("open");
+}
+document.getElementById("btn-new-faq").addEventListener("click", () => openEditor());
+document.getElementById("btn-editor-back").addEventListener("click", () => document.getElementById("faq-editor").classList.remove("open"));
+document.getElementById("btn-save-faq").addEventListener("click", async () => {
+  const question = document.getElementById("faq-question").value.trim();
+  const answer = document.getElementById("faq-answer").value.trim();
+  if (!question || !answer) return;
+  if (editingFaqId) {
+    await api(`/api/faqs/${slug}/${editingFaqId}`, { method: "PUT", body: { question, answer } });
+  } else {
+    await api(`/api/faqs/${slug}`, { method: "POST", body: { question, answer } });
+  }
+  document.getElementById("faq-editor").classList.remove("open");
+  toast("已儲存");
+  loadFaqs();
+});
+
+// ===== 對話紀錄 =====
+const STATUS_LABEL = { resolved: "已解決", handoff: "待真人", missed: "未命中", rate_limited: "已限速" };
+function setConvTab(status) {
+  document.querySelectorAll("#conv-tabs .filter-tab").forEach((t) => t.classList.toggle("active", t.dataset.status === status));
+}
+document.querySelectorAll("#conv-tabs .filter-tab").forEach((t) =>
+  t.addEventListener("click", () => { setConvTab(t.dataset.status); loadConversations(t.dataset.status); }),
+);
+
+async function loadConversations(status) {
+  const { conversations } = await api(`/api/conversations/${slug}?status=${status}`);
+  const cards = document.getElementById("conv-card-list");
+  const tbody = document.getElementById("conv-table-body");
+  cards.innerHTML = "";
+  tbody.innerHTML = "";
+  for (const c of conversations) {
+    const when = `${fmtDate(c.created_at)} ${fmtTime(c.created_at)}`;
+    const badgeClass = { resolved: "status-ok", handoff: "status-handoff", missed: "status-miss", rate_limited: "status-rate" }[c.status] ?? "status-rate";
+    const badge = `<span class="status-badge ${badgeClass}">${STATUS_LABEL[c.status] ?? c.status}</span>`;
+
+    const card = document.createElement("div");
+    card.className = "conv-card";
+    card.innerHTML = `
+      <div class="conv-head"><span class="conv-name num"></span>${badge}<span class="conv-time num">${when}</span></div>
+      <div class="conv-line"><span class="who">客人：</span></div>
+      <div class="conv-line"><span class="who">機器人：</span></div>`;
+    card.querySelector(".conv-name").textContent = c.user_id ? c.user_id.slice(0, 8) : "客人";
+    card.querySelectorAll(".conv-line")[0].append(c.user_text ?? "");
+    card.querySelectorAll(".conv-line")[1].append(c.ai_text ?? "");
+    cards.appendChild(card);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="num"></td><td></td><td>${badge}</td><td class="num">${when}</td>`;
+    tr.children[0].textContent = c.user_id ? c.user_id.slice(0, 8) : "客人";
+    tr.children[1].textContent = c.user_text ?? "";
+    tbody.appendChild(tr);
+  }
+}
+
+// ===== 綁定 =====
+document.getElementById("btn-copy-url").addEventListener("click", async () => {
+  await navigator.clipboard.writeText(document.getElementById("webhook-url").value);
+  toast("已複製");
+});
+async function loadBindStatus() {
+  try {
+    const me = await api("/api/auth/me");
+    // 用知識庫可否讀取判斷綁定狀態；正式狀態燈號待後端回綁定欄位
+    void me;
+  } catch { /* 忽略 */ }
+}
+document.getElementById("btn-save-keys").addEventListener("click", async () => {
+  clearFieldErrors();
+  const channelSecret = document.getElementById("bind-secret").value.trim();
+  const accessToken = document.getElementById("bind-token").value.trim();
+  const errEl = document.getElementById("bind-error");
+  errEl.textContent = "";
+  try {
+    const res = await api(`/api/bind/${slug}`, { method: "POST", body: { channelSecret, accessToken } });
+    document.getElementById("bind-dot").className = "status-dot dot-ok";
+    document.getElementById("bind-status-text").textContent = `已連線（${res.maskedToken}）`;
+    document.getElementById("bind-status-text").style.color = "var(--success)";
+    document.getElementById("bind-secret").value = "";
+    document.getElementById("bind-token").value = "";
+    toast("已儲存");
+  } catch (err) {
+    // 10.6：失敗紅字、表單內容保留
+    errEl.style.display = "block";
+    errEl.textContent = err.message ?? "儲存失敗，請稍後再試";
+    if (!channelSecret) showFieldError("bind-secret", "請填 Channel secret");
+    if (!accessToken) showFieldError("bind-token", "請填 Channel access token");
+  }
+});
+
+// ===== 用量 =====
+async function loadUsage() {
+  const u = await api(`/api/usage/${slug}`);
+  document.getElementById("usage-count").textContent = u.count.toLocaleString("en-US");
+  document.getElementById("usage-limit").textContent = u.limit.toLocaleString("en-US");
+  const pct = Math.min(100, Math.round((u.count / u.limit) * 100));
+  const bar = document.getElementById("usage-bar");
+  bar.style.width = `${pct}%`;
+  bar.className = "progress-fill" + (u.exceeded ? " over" : pct >= 80 ? " warn" : "");
+  document.getElementById("usage-over").style.display = u.exceeded ? "block" : "none";
+}
+async function refreshUsageChip() {
+  try {
+    const u = await api(`/api/usage/${slug}`);
+    document.getElementById("chip-usage").textContent = `${u.count.toLocaleString("en-US")}/${u.limit.toLocaleString("en-US")}`;
+  } catch { /* 頂欄徽章失敗不影響 */ }
+}
+
+// ===== 模型設定 =====
+async function loadModelSettings() {
+  const m = await api(`/api/model-settings/${slug}`);
+  document.querySelector(`input[name="model-mode"][value="${m.mode}"]`).checked = true;
+  document.getElementById("model-custom-fields").hidden = m.mode !== "custom";
+  document.getElementById("model-base-url").value = m.baseUrl ?? "";
+  document.getElementById("model-name").value = m.model ?? "";
+  const hint = document.getElementById("model-key-mask-hint");
+  hint.hidden = !m.apiKeyMask;
+  document.getElementById("model-key-mask").textContent = m.apiKeyMask ?? "";
+}
+document.querySelectorAll("input[name='model-mode']").forEach((r) =>
+  r.addEventListener("change", () => {
+    document.getElementById("model-custom-fields").hidden = document.querySelector("input[name='model-mode']:checked").value !== "custom";
+  }),
+);
+document.getElementById("btn-save-model").addEventListener("click", async () => {
+  clearFieldErrors();
+  const mode = document.querySelector("input[name='model-mode']:checked").value;
+  const errEl = document.getElementById("model-error");
+  errEl.textContent = "";
+  try {
+    if (mode === "platform") {
+      await api(`/api/model-settings/${slug}`, { method: "PUT", body: { mode: "platform" } });
+    } else {
+      const baseUrl = document.getElementById("model-base-url").value.trim();
+      const apiKey = document.getElementById("model-api-key").value.trim();
+      const model = document.getElementById("model-name").value.trim();
+      if (!baseUrl) return showFieldError("model-base-url", "請填 Base URL");
+      if (!apiKey) return showFieldError("model-api-key", "請填 API key");
+      if (!model) return showFieldError("model-name", "請填模型名稱");
+      await api(`/api/model-settings/${slug}`, { method: "PUT", body: { mode: "custom", baseUrl, apiKey, model } });
+    }
+    toast("已儲存");
+    loadModelSettings();
+  } catch (err) {
+    errEl.style.display = "block";
+    errEl.textContent = err.message ?? "儲存失敗";
+  }
+});
+document.getElementById("btn-reset-model").addEventListener("click", async () => {
+  await api(`/api/model-settings/${slug}`, { method: "PUT", body: { mode: "platform" } });
+  toast("已恢復平台預設");
+  loadModelSettings();
+});
+</script>
+
+</body>
+</html>

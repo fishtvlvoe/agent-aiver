@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINE AI 客服 — 讓官方帳號自己會回話</title>
+<link rel="stylesheet" href="app.css">
+<style>
+/* Landing 專用 */
+.hero { text-align: center; padding: 56px 16px 32px; }
+.hero h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+.hero p { color: var(--muted-foreground); font-size: 1rem; max-width: 480px; margin: 0 auto 24px; }
+.hero .btn { min-width: 200px; }
+.landing-section { padding: 32px 16px; }
+.landing-section h2 { text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 20px; }
+.step-grid { display: grid; gap: 12px; }
+@media (min-width: 768px) { .step-grid { grid-template-columns: repeat(3, 1fr); } }
+.step-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 20px;
+}
+.step-card .step-no {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: var(--primary-foreground);
+  display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 12px;
+}
+.step-card h3 { font-size: 1rem; margin-bottom: 6px; }
+.step-card p { color: var(--muted-foreground); font-size: 0.875rem; }
+.price-card { text-align: center; }
+.price-card .price { font-size: 2rem; font-weight: 700; }
+.price-card .price-note { color: var(--muted-foreground); font-size: 0.875rem; }
+.landing-footer {
+  text-align: center; color: var(--muted-foreground); font-size: 0.75rem;
+  padding: 24px 16px calc(96px + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) { .landing-footer { padding-bottom: 24px; } }
+/* 390px 主 CTA 滿寬置底 */
+.cta-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: var(--card); border-top: 1px solid var(--border);
+  padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+}
+.cta-bar .btn { width: 100%; }
+@media (min-width: 1024px) { .cta-bar { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <strong style="font-size:1.125rem">LINE AI 客服</strong>
+  <span style="flex:1"></span>
+  <button class="btn btn-primary btn-sm" id="login-top">店家登入</button>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>讓官方帳號自己會回話</h1>
+    <p>客人 LINE 一來，AI 依你的知識庫秒回。忙不過來時自動轉真人，費用有上限不怕爆。</p>
+    <button class="btn btn-primary" id="login-hero">
+      <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      店家登入
+    </button>
+  </section>
+
+  <section class="landing-section">
+    <h2>三步驟開始</h2>
+    <div class="step-grid">
+      <div class="step-card">
+        <div class="step-no">1</div>
+        <h3>綁定官方帳號</h3>
+        <p>貼上 Channel secret 與 access token，按下驗證就完成了。</p>
+      </div>
+      <div class="step-card">
+        <div class="step-no">2</div>
+        <h3>寫知識庫</h3>
+        <p>把客人常問的問題與答案寫成 FAQ，AI 只依這裡回答，不亂編。</p>
+      </div>
+      <div class="step-card">
+        <div class="step-no">3</div>
+        <h3>自動回話</h3>
+        <p>客人私訊立即回；答不出來會誠實說，要真人時自動轉達。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-section">
+    <h2>價格</h2>
+    <div class="container" style="padding-top:0">
+      <div class="card price-card">
+        <div class="price num">NT$0</div>
+        <p class="price-note">搶先體驗期間免費，每店每月 5,000 則 AI 回覆上限。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="landing-footer">LINE AI 客服 · 資料只存你的店家資料裡</footer>
+
+<div class="cta-bar">
+  <button class="btn btn-primary" id="login-bar">店家登入</button>
+</div>
+
+<script type="module">
+import { getLiffId } from "./app.js";
+
+let liffId = null;
+try {
+  liffId = await getLiffId();
+} catch { /* 後端未部署時維持 null */ }
+
+function openLogin() {
+  if (liffId) window.location.href = `https://liff.line.me/${liffId}`;
+}
+for (const id of ["login-top", "login-hero", "login-bar"]) {
+  document.getElementById(id).addEventListener("click", openLogin);
+}
+</script>
+
+</body>
+</html>
