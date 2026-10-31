@@ -98,7 +98,7 @@ test("8.2 me：有效 session → 回身分；無效/過期 → 401", async () =
   const { token } = await createSession(kv, { role: "store", tenantId: "t1", userId: "U-store-1", name: "老張" });
   const res = await handleMe(new Request("http://localhost/api/auth/me", { headers: { authorization: `Bearer ${token}` } }), env);
   assert.equal(res.status, 200);
-  assert.deepEqual(await res.json(), { role: "store", tenantId: "t1", slug: null, userId: "U-store-1", name: "老張" });
+  assert.deepEqual(await res.json(), { role: "store", tenantId: "t1", slug: null, userId: "U-store-1", name: "老張", impersonatedBy: null });
 
   assert.equal((await handleMe(new Request("http://localhost/api/auth/me"), env)).status, 401);
   assert.equal((await handleMe(new Request("http://localhost/api/auth/me", { headers: { authorization: "Bearer nope" } }), env)).status, 401);
