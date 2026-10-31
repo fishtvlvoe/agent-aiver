@@ -57,4 +57,6 @@
   - LINE Login channel `2011708268`（AIVER AI 語音助理）→ 登入用。
   - LIFF app `2011708268-mYfaLqBv`（`https://liff.line.me/2011708268-mYfaLqBv`，名稱「AIVER 店家後台」）→ 店家後台在 LINE 內開的入口。Scope 含 openid、profile、**chat_message.write（老魚要求開啟，日後代店家發訊息用）**；Add friend option 老魚已改為開啟。
 - **金鑰存放**：以上全部寫入專案 `.env`（`LINE_CHANNEL_SECRET`、`LINE_CHANNEL_ACCESS_TOKEN`、`LINE_LOGIN_CHANNEL_ID`、`LINE_LOGIN_CHANNEL_SECRET`、`LIFF_ID`、`APP_DOMAIN`）；`.env` 已加入 `.gitignore`。上線時改以 `wrangler secret put` 進 Worker secrets。
-- **既有可用**：`OPENAI_API_KEY`、`CLOUDFLARE_API_TOKEN`、`GEMINI_API_KEY`、`MIRASIM_API_KEY/MIRASIM_API_BASE`。
+- **既有可用**：`OPENAI_API_KEY`、`GEMINI_API_KEY`、`MIRASIM_API_KEY/MIRASIM_API_BASE`。
+- **Cloudflare token（2026-11-01 更新）**：老魚新建 `ai-full-access` token，含 Workers 指令碼/KV/D1/Pages/區域 DNS/SSL 全編輯、範圍 All zones。值存在 Development 根目錄 `.env` 與專案 `.env` 的 `CLOUDFLARE_WORKERS_API_TOKEN`（兩處已同步）。舊 `CLOUDFLARE_API_TOKEN` 權限不足已棄用（留檔）。
+- **正式網域已通**：`https://app.aiver.me` 200（Pages custom domain active，DNS CNAME app→agent-aiver.pages.dev 橘雲）。LIFF endpoint 原設定即此網域。

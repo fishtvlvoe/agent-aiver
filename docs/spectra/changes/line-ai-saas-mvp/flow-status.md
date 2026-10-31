@@ -11,7 +11,7 @@
 | ⑤ 步驟 3 Spectra SR | ✅ 做了 | proposal/design/3 specs/tasks 完成；老魚要求 analyze 全綠 → 補需求對照、任務掛需求名、14 場景補 Example；analyze 0 findings、validate 通過（2026-10-31 深夜複查） |
 | ⑥ 步驟 4 派工實作 | ✅ 做了 | 前置已備齊：.env 已有 OpenAI/Cloudflare/mirasim key＋LINE 雙 channel 金鑰＋LIFF_ID＋APP_DOMAIN=app.aiver.me（2026-10-31，詳見 notes.md「環境與帳號設定」）。注意：測試 channel 2011708742 現掛舊 voice-agent webhook，串接前需老魚確認切換。 |
 | ⑦ 步驟 5 四關驗收 | 🔶 部分 | 關 1 本功能 e2e：92 pass/0 fail 全綠 ✅；關 2 舊功能回歸：本專案無舊功能 N/A ✅；關 3 三身分 ego-browser 走查：需已部署環境＋真實 LIFF 登入，受 webhook 切換授權阻塞 🔶；關 4 Fish 白話驗收：待老魚 🔶 |
-| ⑧ 步驟 6 收尾 | 🔶 部分 | 阻塞：專案目錄不在任何 git 版控（根 repo .gitignore `/*` 白名單排除，老魚 2026-10-18 定案），且無 remote。需老魚決定版控歸屬（加白名單進根 repo / 獨立 repo＋建 GitHub remote）才能 commit+PR。retro 待 PR 後。 |
+| ⑧ 步驟 6 收尾 | 🔶 部分 | 老魚 2026-11-01 定：獨立 GitHub repo `agent-aiver`（fishtvlvoe/agent-aiver，private）。已 git init＋首 commit＋push main，部署 commit 64fa149 已推。voice-agent 舊服務老魚同意廢止，LINE webhook 已切至新 Worker 並 Verify Success。剩：retro 白話 HTML → 老魚點頭 → archive。 |
 | ⑨ 復盤 retro | ⬜ 沒做 | 待 commit/PR 解鎖後 |
 | ⑩ 封存 archive | ⬜ 沒做 | 待 PR 合併＋retro 完成 |
 
