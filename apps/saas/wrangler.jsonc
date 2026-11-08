@@ -5,7 +5,7 @@
 	"compatibility_date": "2025-09-01",
 	"compatibility_flags": ["nodejs_compat"],
 	"workers_dev": true,
-	"vars": { "NEXT_PUBLIC_SAAS_URL": "https://admin.aiver.me" },
+	"vars": { "NEXT_PUBLIC_SAAS_URL": "https://admin.aiver.me", "NEXT_PUBLIC_MARKETING_URL": "https://app.aiver.me" },
 	"routes": [{ "pattern": "admin.aiver.me", "custom_domain": true }],
 	"assets": {
 		"directory": ".open-next/assets",
