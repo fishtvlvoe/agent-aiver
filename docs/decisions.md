@@ -30,3 +30,10 @@
 - 可重用腳本：`scripts/cf-builds-connect.sh`（一個 Worker 一次呼叫）。
 - GitHub 部署步驟待推送自動上線驗證後才移除，只留 test。
 - 2026-11-08 驗證：合併 PR #3 後，Cloudflare 三個 Worker 皆自動建置成功並上線。GitHub 工作流程改名 test.yml，只留測試；部署全由 Cloudflare 執行。
+
+## 2026-11-08 測信箱一律用 AgentEmail(老魚定)
+- 要驗證任何寄出的信(重設密碼、驗證信、通知),代理自己讀 AgentEmail 信箱,不請老魚轉寄或截圖。
+- 設定在 `/Users/fishtv/Development/.env`:`AGENTMAIL_API_KEY`、`AGENTMAIL_INBOX`(`fish-xiaoou@agentmail.to`)。不得印出金鑰。
+- 讀信:`GET https://api.agentmail.to/v0/inboxes/$AGENTMAIL_INBOX/messages?limit=N`(Bearer 金鑰),信內連結看 `text` 欄位。
+- 測試帳號:管理端已用此信箱註冊 `agentmail-test`,可直接觸發重設密碼收信。
+- 實例:11/8 重設密碼信曾寫成 `localhost:3000`,PR #5 在 `apps/saas/wrangler.jsonc` 加 `vars` 修好,用 AgentEmail 收信確認連結為 `admin.aiver.me`。
