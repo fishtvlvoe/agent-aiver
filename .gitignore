@@ -45,3 +45,6 @@ dist/
 .prisma-zod-generator-manifest.json
 # agent briefs (local only)
 .agent-brief/
+
+# Spectra app data
+.spectra/
