@@ -60,6 +60,13 @@ export async function upsertBotMonthlyLimit(organizationId: string, monthlyLimit
 		.onConflictDoUpdate({ target: botStore.organizationId, set: { monthlyLimit } });
 }
 
+export async function upsertBotPersona(organizationId: string, persona: string | null) {
+	await db
+		.insert(botStore)
+		.values({ organizationId, createdAt: new Date(), persona })
+		.onConflictDoUpdate({ target: botStore.organizationId, set: { persona } });
+}
+
 export async function upsertBotUsePlatformModel(
 	organizationId: string,
 	usePlatformModel: boolean,

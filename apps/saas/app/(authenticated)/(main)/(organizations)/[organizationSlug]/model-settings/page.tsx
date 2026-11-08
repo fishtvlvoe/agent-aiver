@@ -1,5 +1,6 @@
 import { getActiveOrganization, getSession } from "@auth/lib/server";
 import { ModelSettingsForm } from "@bot/components/ModelSettingsForm";
+import { PersonaForm } from "@bot/components/PersonaForm";
 import { PageHeader } from "@shared/components/PageHeader";
 import { permix, setupPermissions } from "@shared/lib/permix";
 import { getTranslations } from "next-intl/server";
@@ -46,6 +47,10 @@ export default async function ModelSettingsPage({
 			<PageHeader title={t("title")} subtitle={t("description")} />
 
 			<ModelSettingsForm organizationId={organization.id} />
+
+			<div className="mt-6">
+				<PersonaForm organizationId={organization.id} />
+			</div>
 		</>
 	);
 }

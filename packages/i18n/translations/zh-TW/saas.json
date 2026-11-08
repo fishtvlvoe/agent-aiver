@@ -282,6 +282,14 @@
 			"cfOauthDisconnected": "已中斷 Cloudflare 連結",
 			"cfOauthManualToggle": "改用手動貼 Token",
 			"cfOauthManualHide": "收起手動設定",
+			"persona": {
+				"title": "說話風格",
+				"description": "描述機器人回覆客人時的語氣與口吻，例如「親切、簡短，稱呼客人為您」。這裡的設定不會覆蓋安全規則與不回答的限制。",
+				"placeholder": "例如：語氣輕鬆親切，回答簡短，不要使用驚嘆號",
+				"save": "儲存說話風格",
+				"saved": "已儲存說話風格",
+				"saveFailed": "儲存失敗，請稍後再試"
+			},
 			"cfErrorDenied": "你取消了 Cloudflare 授權",
 			"cfErrorNoAccount": "這個 Cloudflare 帳號底下沒有可用的帳戶，請換一個帳號再試",
 			"cfErrorExchange": "Cloudflare 授權失敗，請稍後再試",

@@ -6,3 +6,4 @@
 - LINE webhook 切換（老魚當場同意實測）：頻道 AIVER AI 語音助理 Messaging API（2011708742）
   - 舊網址（失敗時改回）：https://line-ai-saas.fishandy1213.workers.dev/webhook/store
   - 新網址：https://agent-aiver.fishandy1213.workers.dev/webhook/fish
+舊身分 user,可改回: update user set role='user' where email='fish@fishot.com'

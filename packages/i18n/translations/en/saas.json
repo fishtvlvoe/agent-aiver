@@ -234,6 +234,18 @@
 			"message": "Enter the one-time password from your authenticator app to continue."
 		}
 	},
+	"bot": {
+		"modelSettings": {
+			"persona": {
+				"title": "Speaking style",
+				"description": "Describe the tone the bot uses when replying to guests, for example \"friendly and brief, address guests formally\". This setting does not override safety rules or the topics the bot must not answer.",
+				"placeholder": "For example: relaxed and friendly tone, short answers, no exclamation marks",
+				"save": "Save speaking style",
+				"saved": "Speaking style saved",
+				"saveFailed": "Save failed, please try again later"
+			}
+		}
+	},
 	"choosePlan": {
 		"title": "Choose your plan",
 		"description": "To continue, please select a plan."
