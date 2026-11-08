@@ -16,5 +16,11 @@
 
 ## 4. cf-saas
 
-- [ ] 4.1 查瀏覽器一啟動就關閉的原因並修好(對應需求「cf-saas 畫面測試可執行」)。行為:全套 e2e 可跑。驗證:`pnpm exec playwright test` 51 個全過
-- [ ] 4.2 更新 `cf-saas` 驗收清單 R1-2 並記驗收意見。驗證:`docs/acceptance/acceptance-backlog.md` diff
+- [x] 4.1 查瀏覽器一啟動就關閉的原因並修好(對應需求「cf-saas 畫面測試可執行」)。行為:全套 e2e 可跑。驗證:`pnpm exec playwright test` 全過。測到的(2026-11-09):原因是 Playwright 1.58.0 需要 `chromium_headless_shell-1208`,本機只有 1248 版;`playwright install` 下載成功但解壓卡死(逾時 exit 124,目錄只有 1.5 MB)。改用系統 unzip 解壓同一個官方 zip(95,530,994 位元組),執行檔 `--version` 回 145.0.7632.6,完整 e2e 50 個全過(原寫 51 為誤植,實際共 50 個、10 個檔)。還沒驗的:Playwright 內建解壓為何卡住,根因未查;其他機器重裝可能再遇到,改用系統 unzip 即可
+- [x] 4.2 更新 `cf-saas` 驗收清單 R1-2 並記驗收意見。驗證:`docs/acceptance/acceptance-backlog.md` diff。測到的(2026-11-09):R1-2 由「未做」改為「已補」並附 commit f9f2cce 與 e2e 結果;檔案在 cf-saas repo 的 docs/acceptance/。還沒驗的:真人看付款頁畫面
+
+## 5. 後續追蹤
+
+- [ ] 5.1 D1 `line-ai-saas-db`(10/31 第一代 AIVER 測試資料)處理。行為:決定保留或刪除。驗證:刪前列表與筆數(tenants 1、faqs 1、conversations 6、usage_counters 1、platform_admins 1、audit_events 5);刪除需老魚同意;老魚 2026-11-09 說「先看」,目前保留不動
+- [ ] 5.2 比對舊版 `agent-aiver-legacy-worker` 86 個未推送提交的功能是否已在 agent-aiver 重做。驗證:產出對照表,列出已重做與未重做項目
+
