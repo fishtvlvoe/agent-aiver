@@ -5,7 +5,7 @@
 
 ## 2. 授權與語系(代理自行做)
 
-- [ ] 2.1 在 `admin.aiver.me` 重跑「連接 Cloudflare」(需求「Cloudflare 授權可用」)。行為:授權後回到後台顯示已連接。驗證:Playwright 或實測輸出
+- [x] 2.1 在 `admin.aiver.me` 重跑「連接 Cloudflare」(需求「Cloudflare 授權可用」)。行為:授權後回到後台顯示已連接。驗證:Playwright 或實測輸出。測到的(2026-11-09):老魚本人在 admin.aiver.me 完成授權,遠端 D1 `bot_audit_event` 最新一筆為 `cf_oauth_linked`(接在 `cf_oauth_disconnected` 之後 14 秒,membershipCount 1)。還沒驗的:授權後頁面顯示「已連接」的畫面截圖,併入 4.1 手機驗收
 - [ ] 2.2 移除非繁中語系(需求「介面只提供繁體中文」)。行為:缺鍵時顯示繁中。驗證:`pnpm type-check` 與單元測試通過
 
 ## 3. 重設密碼
