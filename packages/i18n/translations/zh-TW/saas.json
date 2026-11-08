@@ -862,6 +862,10 @@
 		"welcome": "歡迎，{name}！"
 	},
 	"common": {
+		"footer": {
+			"privacyPolicy": "隱私權政策",
+			"termsAndConditions": "條款與條件"
+		},
 		"confirmation": {
 			"cancel": "取消",
 			"confirm": "確認"
