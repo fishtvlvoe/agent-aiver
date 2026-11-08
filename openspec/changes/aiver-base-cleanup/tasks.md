@@ -10,7 +10,7 @@
 
 ## 3. 清理誤建資源(每項需老魚同意)
 
-- [ ] 3.1 GitHub `line-ai-saas` 與 Pages `line-ai-saas`(需求「外部資源刪除需同意」)。驗證:刪前列內容、刪後查詢不存在;狀態 [等老魚]
+- [x] 3.1 GitHub `line-ai-saas` 與 Pages `line-ai-saas`(需求「外部資源刪除需同意」)。驗證:刪前列內容、刪後查詢不存在;狀態 [等老魚]。測到的(2026-11-09):老魚同意;GitHub repo line-ai-saas 與 Pages line-ai-saas 已刪,查詢皆回找不到。
 - [ ] 3.2 D1 `line-ai-saas-db-v2` 與舊 Worker `line-ai-saas`。驗證:刪前列資料表與筆數、刪後查詢;狀態 [等老魚]
 - [ ] 3.3 本機 `B-產品/products/line-ai-saas`。驗證:刪前 `ls` 與 `git status`;狀態 [等老魚]
 
