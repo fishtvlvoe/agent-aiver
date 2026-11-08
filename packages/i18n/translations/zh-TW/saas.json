@@ -146,6 +146,7 @@
 			"title": "知識庫",
 			"description": "教機器人怎麼回答客人常問的問題。",
 			"newQuestion": "新增問答",
+			"bulkPaste": "批次貼上",
 			"columns": {
 				"question": "客人會怎麼問",
 				"answer": "回答"
@@ -165,7 +166,20 @@
 			"deleteConfirm": "確定要刪除這則問答嗎？",
 			"created": "已新增問答",
 			"updated": "已更新問答",
-			"deleted": "已刪除問答"
+			"deleted": "已刪除問答",
+			"bulk": {
+				"title": "批次貼上問答",
+				"description": "每則兩行：「問:」開頭是客人會問的問題，「答:」開頭是回答，則與則之間空一行。一次最多 100 則。",
+				"inputLabel": "貼上問答內容",
+				"placeholder": "問:營業時間是幾點？\n答:週一至週五 9:00-18:00。\n\n問:要停車嗎？\n答:店門口有兩格臨停車位。",
+				"preview": "預覽",
+				"emptyPreview": "貼上後會在這裡顯示解析結果。",
+				"count": "可匯入 {count} 則",
+				"errorsTitle": "有 {count} 處需要修正，修正後才能匯入",
+				"errorLine": "第 {line} 行：{message}",
+				"import": "匯入問答",
+				"imported": "已匯入 {count} 則問答"
+			}
 		},
 		"lineSettings": {
 			"title": "LINE 設定",

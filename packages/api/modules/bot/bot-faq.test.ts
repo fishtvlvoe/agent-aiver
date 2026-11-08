@@ -14,6 +14,7 @@ vi.mock("@repo/database", () => ({
 	getOrganizationMembership: vi.fn(),
 	listBotFaqsByOrganizationId: vi.fn(),
 	insertBotFaq: vi.fn(),
+	insertBotFaqs: vi.fn(),
 	updateBotFaqByOrganizationId: vi.fn(),
 	deleteBotFaqByOrganizationId: vi.fn(),
 }));
@@ -23,11 +24,13 @@ import {
 	deleteBotFaqByOrganizationId,
 	getOrganizationMembership,
 	insertBotFaq,
+	insertBotFaqs,
 	listBotFaqsByOrganizationId,
 	updateBotFaqByOrganizationId,
 } from "@repo/database";
 
 import { createFaq } from "./procedures/create-faq";
+import { createFaqs } from "./procedures/create-faqs";
 import { deleteFaq } from "./procedures/delete-faq";
 import { listFaqs } from "./procedures/list-faqs";
 import { updateFaq } from "./procedures/update-faq";
@@ -221,5 +224,83 @@ describe("bot FAQ procedures", () => {
 			call(deleteFaq, { organizationId: "org-b", faqId: "faq-of-org-b" }, context),
 		).rejects.toMatchObject({ code: "FORBIDDEN" });
 		expect(deleteBotFaqByOrganizationId).not.toHaveBeenCalled();
+	});
+
+	it("rejects bulk creating FAQs by a regular member who cannot manage the organization", async () => {
+		vi.mocked(getOrganizationMembership).mockResolvedValueOnce(membershipOf("org-a", "member"));
+
+		await expect(
+			call(
+				createFaqs,
+				{ organizationId: "org-a", faqs: [{ question: "可以刷卡嗎？", answer: "可以。" }] },
+				context,
+			),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		expect(insertBotFaqs).not.toHaveBeenCalled();
+	});
+
+	it("writes all bulk FAQs in one call inside the caller's organization", async () => {
+		vi.mocked(getOrganizationMembership).mockResolvedValueOnce(membershipOf("org-a", "owner"));
+
+		const result = await call(
+			createFaqs,
+			{
+				organizationId: "org-a",
+				faqs: [
+					{ question: "幾點營業?", answer: "10:00–19:00" },
+					{ question: "有免運嗎?", answer: "滿 1000 免運" },
+				],
+			},
+			context,
+		);
+
+		expect(result).toEqual({ count: 2 });
+		expect(insertBotFaqs).toHaveBeenCalledTimes(1);
+		expect(insertBotFaqs).toHaveBeenCalledWith([
+			expect.objectContaining({
+				organizationId: "org-a",
+				question: "幾點營業?",
+				answer: "10:00–19:00",
+			}),
+			expect.objectContaining({
+				organizationId: "org-a",
+				question: "有免運嗎?",
+				answer: "滿 1000 免運",
+			}),
+		]);
+	});
+
+	it("rejects the whole bulk batch when it exceeds 100 FAQs", async () => {
+		vi.mocked(getOrganizationMembership).mockResolvedValueOnce(membershipOf("org-a", "owner"));
+		const faqs = Array.from({ length: 101 }, (_, index) => ({
+			question: `問題 ${index + 1}`,
+			answer: `回答 ${index + 1}`,
+		}));
+
+		await expect(
+			call(createFaqs, { organizationId: "org-a", faqs }, context),
+		).rejects.toMatchObject({
+			code: "BAD_REQUEST",
+		});
+		expect(insertBotFaqs).not.toHaveBeenCalled();
+	});
+
+	it("rejects the whole bulk batch when one item has an empty answer", async () => {
+		vi.mocked(getOrganizationMembership).mockResolvedValueOnce(membershipOf("org-a", "owner"));
+
+		await expect(
+			call(
+				createFaqs,
+				{
+					organizationId: "org-a",
+					faqs: [
+						{ question: "幾點營業?", answer: "10:00–19:00" },
+						{ question: "有免運嗎?", answer: "   " },
+					],
+				},
+				context,
+			),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		expect(insertBotFaqs).not.toHaveBeenCalled();
 	});
 });

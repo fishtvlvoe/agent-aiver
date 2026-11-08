@@ -20,6 +20,13 @@ export async function insertBotFaq(row: typeof botFaq.$inferInsert) {
 	await db.insert(botFaq).values(row);
 }
 
+// D1 的 batch 在同一筆交易中執行，任一筆失敗則整批不寫入
+export async function insertBotFaqs(rows: (typeof botFaq.$inferInsert)[]) {
+	const [first, ...rest] = rows.map((row) => db.insert(botFaq).values(row));
+	if (!first) return;
+	await db.batch([first, ...rest]);
+}
+
 // 回傳 false 表示該組織下找不到這筆問答（含屬於其他組織的 id）
 export async function updateBotFaqByOrganizationId(
 	organizationId: string,
