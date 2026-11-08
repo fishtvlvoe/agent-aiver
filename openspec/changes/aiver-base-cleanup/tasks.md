@@ -11,7 +11,7 @@
 ## 3. 清理誤建資源(每項需老魚同意)
 
 - [x] 3.1 GitHub `line-ai-saas` 與 Pages `line-ai-saas`(需求「外部資源刪除需同意」)。驗證:刪前列內容、刪後查詢不存在;狀態 [等老魚]。測到的(2026-11-09):老魚同意;GitHub repo line-ai-saas 與 Pages line-ai-saas 已刪,查詢皆回找不到。
-- [ ] 3.2 D1 `line-ai-saas-db-v2` 與舊 Worker `line-ai-saas`。驗證:刪前列資料表與筆數、刪後查詢;狀態 [等老魚]
+- [x] 3.2 D1 `line-ai-saas-db-v2` 與舊 Worker `line-ai-saas`。驗證:刪前列資料表與筆數、刪後查詢;狀態 [等老魚]。測到的(2026-11-09):老魚同意;D1 line-ai-saas-db-v2(7 表全 0 筆)已刪;Worker line-ai-saas 已刪(刪前查無其他 Worker 的 service binding、無網域路由,底座 repo 無引用),查詢皆不存在,app.aiver.me 仍 200。還沒驗的:D1 line-ai-saas-db(10/31)內容未看,未刪。
 - [ ] 3.3 本機 `B-產品/products/line-ai-saas`。驗證:刪前 `ls` 與 `git status`;狀態 [等老魚]
 
 ## 4. cf-saas
