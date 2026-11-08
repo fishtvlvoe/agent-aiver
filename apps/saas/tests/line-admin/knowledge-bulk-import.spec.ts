@@ -18,7 +18,7 @@ async function signIn(request: APIRequestContext, email: string, password: strin
 	let status = 0;
 	for (let attempt = 0; attempt < 6; attempt++) {
 		const res = await request.post(`${BASE}/api/auth/sign-in/email`, {
-			headers: { Origin: BASE, "Content-Type": "application/json" },
+			headers: { "Content-Type": "application/json" },
 			data: { email, password },
 		});
 		status = res.status();
@@ -37,7 +37,7 @@ async function ownerPage(browser: Browser, width = 1440): Promise<Page> {
 async function openBulkDialog(page: Page) {
 	await page.goto(KNOWLEDGE_URL, { waitUntil: "networkidle" });
 	await page.getByRole("button", { name: "批次貼上", exact: true }).click();
-	await expect(page.getByRole("dialog")).toBeVisible();
+	await expect(page.locator('[role="dialog"]:not([data-slot="toast"])')).toBeVisible();
 }
 
 test.setTimeout(120_000);
@@ -54,7 +54,7 @@ test("貼上兩則問答後列表新增兩筆", async ({ browser }) => {
 	await expect(page.getByText("可匯入 2 則", { exact: true })).toBeVisible();
 	await page.getByRole("button", { name: "匯入問答", exact: true }).click();
 
-	await expect(page.getByRole("dialog")).toBeHidden();
+	await expect(page.locator('[role="dialog"]:not([data-slot="toast"])')).toBeHidden();
 	await expect(page.getByText("已匯入 2 則問答", { exact: true })).toBeVisible();
 	await expect(page.getByRole("cell", { name: q1, exact: true })).toBeVisible();
 	await expect(page.getByRole("cell", { name: q2, exact: true })).toBeVisible();
@@ -67,9 +67,9 @@ test("貼上 101 則時顯示錯誤且不可匯入", async ({ browser }) => {
 		{ length: 101 },
 		(_, i) => `問:超量題目${i + 1}\n答:超量回答${i + 1}`,
 	).join("\n\n");
-	const rowsBefore = await page.locator("table tbody tr").count();
-
 	await openBulkDialog(page);
+	await expect.poll(() => page.locator("table tbody tr").count(), { timeout: 20_000 }).toBeGreaterThan(0);
+	const rowsBefore = await page.locator("table tbody tr").count();
 	await page.getByLabel("貼上問答內容").fill(text);
 
 	await expect(page.getByRole("alert")).toContainText("一次最多 100 則");
@@ -77,7 +77,7 @@ test("貼上 101 則時顯示錯誤且不可匯入", async ({ browser }) => {
 	await expect(page.getByRole("button", { name: "匯入問答", exact: true })).toBeDisabled();
 
 	await page.getByRole("button", { name: "取消", exact: true }).click();
-	await expect(page.getByRole("dialog")).toBeHidden();
+	await expect(page.locator('[role="dialog"]:not([data-slot="toast"])')).toBeHidden();
 	await expect(page.locator("table tbody tr")).toHaveCount(rowsBefore);
 	await page.context().close();
 });
