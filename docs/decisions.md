@@ -42,3 +42,18 @@
 - AIVER 目前是測試市場需求的 SaaS,不是正式產品;內容細節由代理決定,不逐項請老魚確認。
 - 法律頁面沿用 fishot.com 的隱私權政策與服務條款改寫(營運方核流有限公司)。
 - 知識庫批次貼上匯入:老魚同意未來要做,另開一張 SR(`aiver-kb-bulk-import`),不放進 aiver-finish。
+
+## 2026-11-09 開發過程教訓(aiver-finish 復盤)
+1. 訪客可見頁面,合併前後都要看線上實際回應。法律頁換文字後單元測試全綠,線上卻 500(Workers 禁用執行期 eval)。做法:部署後跑 `scripts/smoke-live.sh`,新增頁面就加進清單。
+2. 這個底座的 Next.js 頁面不可在執行期編譯 MDX 或用 eval/new Function,內容一律建置時轉好。
+3. 疊在一起的 PR(#7→#8→#9)要先合併前一個再檢查下一個的衝突;勾選檔 tasks.md 是最常衝突處。
+4. 先找本機與 fishot.com 現成資源再問老魚(法律頁就是這樣省掉一輪)。
+5. 測試階段產品,內容細節代理自己決定,不逐項問。
+
+## 2026-11-09 教訓:不要自己決定專案歸屬(老魚指出)
+- 事實:早期我沒問老魚,就把 AIVER 做在 BNI 底下(GitHub `line-ai-saas`、Pages `line-ai-saas`、D1 `line-ai-saas-db-v2`、Worker `line-ai-saas`、本機 `B-產品/products/line-ai-saas`),不是老魚要的獨立產品。後來才改成獨立的 `fishtvlvoe/agent-aiver`。
+- 規則:①建立任何新專案、儲存庫或雲端資源之前,先用一句話跟老魚確認「這是哪個產品、放在哪裡、叫什麼名字」,對不上就不動手。②老魚沒給的網站內容或歸屬,不自己決定;測試階段的小細節(文案、範例資料)才由代理決定。③建立前先查本機與既有專案有沒有現成的,避免重複與誤放。
+- 善後:上面五項誤建資源列在 `aiver-base-cleanup`,逐項刪除前都先問老魚。
+
+## 2026-11-09 流程已升級為全域
+手機實機冒煙(`scripts/phone-smoke.mjs`)、線上冒煙(`scripts/smoke-live.sh`)、寄信測試、建 repo(private)、CI 與 Workers Builds 自動部署，已整理到全域 `~/.agent-guardrails/flows/cf-saas-ship.md`(dev-flow 規則 55)。本專案只留腳本實例。
