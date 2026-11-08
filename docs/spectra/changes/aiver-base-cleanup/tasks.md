@@ -16,5 +16,5 @@
 
 ## 4. cf-saas
 
-- [ ] 4.1 查瀏覽器一啟動就關閉的原因並修好。行為:全套 e2e 可跑。驗證:`pnpm exec playwright test` 51 個全過
+- [ ] 4.1 查瀏覽器一啟動就關閉的原因並修好(對應需求「cf-saas 畫面測試可執行」)。行為:全套 e2e 可跑。驗證:`pnpm exec playwright test` 51 個全過
 - [ ] 4.2 更新 `cf-saas` 驗收清單 R1-2 並記驗收意見。驗證:`docs/acceptance/acceptance-backlog.md` diff
