@@ -37,3 +37,8 @@
 - 讀信:`GET https://api.agentmail.to/v0/inboxes/$AGENTMAIL_INBOX/messages?limit=N`(Bearer 金鑰),信內連結看 `text` 欄位。
 - 測試帳號:管理端已用此信箱註冊 `agentmail-test`,可直接觸發重設密碼收信。
 - 實例:11/8 重設密碼信曾寫成 `localhost:3000`,PR #5 在 `apps/saas/wrangler.jsonc` 加 `vars` 修好,用 AgentEmail 收信確認連結為 `admin.aiver.me`。
+
+## 2026-11-09 測試階段決定(老魚)
+- AIVER 目前是測試市場需求的 SaaS,不是正式產品;內容細節由代理決定,不逐項請老魚確認。
+- 法律頁面沿用 fishot.com 的隱私權政策與服務條款改寫(營運方核流有限公司)。
+- 知識庫批次貼上匯入:老魚同意未來要做,另開一張 SR(`aiver-kb-bulk-import`),不放進 aiver-finish。
