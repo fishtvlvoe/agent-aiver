@@ -32,7 +32,7 @@
 本次補上的內容：
 
 - `apps/saas/modules/shared/components/Footer.tsx`：原為回傳 `null` 的空殼，改為兩個連結，指向 `${NEXT_PUBLIC_MARKETING_URL}/legal/privacy-policy` 與 `/legal/terms`。
-- `packages/i18n/translations/zh-TW/saas.json`：在 `common` 下新增 `footer.privacyPolicy`、`footer.termsAndConditions`。英文鍵是為了讓 `SaasMessages` 型別可以通過，與 `en/saas.json` 為型別來源的設定一致。
+- `packages/i18n/translations/zh-TW/saas.json`：在 `common` 下新增 `footer.privacyPolicy`、`footer.termsAndConditions`。
 
 風險：saas 端的連結是以 `NEXT_PUBLIC_MARKETING_URL` 組成。若部署環境沒有設定此變數，連結會變成站內相對路徑 `/legal/...`，會 404。上線前需確認該環境變數已設定。
 
