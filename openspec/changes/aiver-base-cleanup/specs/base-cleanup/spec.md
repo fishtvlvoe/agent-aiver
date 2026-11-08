@@ -11,6 +11,11 @@
 - **WHEN** 列出底座 main 的檔案
 - **THEN** LINE 相關檔案只有登入與身分相關,無機器人後台
 
+##### Example: 2026-11-08 盤點結果
+- **GIVEN** `opcos-cf-starter` origin/main 的檔案清單
+- **WHEN** 篩選檔名含 line、bot、webhook、knowledge、conversation
+- **THEN** 只有 `packages/auth/plugins/line-liff/`、`line-profile.ts`、`line-identity.ts`、`0001_line_liff_token_claim.sql` 與範例頁 `chatbot/page.tsx`,無機器人後台
+
 ### Requirement: 外部資源刪除需同意
 刪除任何外部資源(倉庫、Pages、D1、Worker、本機專案)前,系統 SHALL 先列出內容並取得老魚逐項同意。
 
