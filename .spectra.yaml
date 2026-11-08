@@ -4,10 +4,10 @@
 # Spec directory path (relative to project root)
 # Changing this requires rebuilding the vector search index.
 # New projects initialize at docs/spectra; configurations without this field resolve to openspec.
-spec_dir: docs/spectra
+spec_dir: openspec
 
 # Language for AI-generated artifacts
-# locale: tw
+locale: tw
 
 # Workflow toggles
 # tdd: true
