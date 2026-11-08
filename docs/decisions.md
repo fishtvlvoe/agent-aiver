@@ -16,3 +16,9 @@
 - 寄件人固定 `fish@aiver.me`，金鑰 `TOSEND_API_KEY` 設為後台 Worker secret（不進版控）。
 - 實測：忘記密碼信已寄達 Fish 信箱，內容為繁體中文。
 - 首頁移除範本的英文 cookie 橫幅；首頁獨立部署為 `agent-aiver-web`。
+
+## 2026-11-08 換成 aiver.me 短網址
+- 首頁 `app.aiver.me`、後台 `admin.aiver.me`、機器人 `bot.aiver.me`；workers.dev 舊網址保留（`workers_dev = true`）。
+- LINE 登入回呼已加 `https://admin.aiver.me/api/auth/callback/line`；實測 LINE 登入成功。
+- 刪除舊 DNS：`app.aiver.me` CNAME → `agent-aiver.pages.dev`（橘雲開）。復原：重建該 CNAME。
+- LINE 機器人 Webhook 尚未切到 bot.aiver.me（最後一步，需實測）。
