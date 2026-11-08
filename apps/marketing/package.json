@@ -5,10 +5,12 @@
 	"scripts": {
 		"build": "next build",
 		"clean": "git clean -xdf .cache .turbo dist node_modules .next .content-collections",
+		"deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
 		"dev": "next dev --port 3001",
 		"e2e": "pnpm exec playwright test --ui",
 		"e2e:ci": "pnpm exec playwright install && pnpm exec playwright test",
 		"generate": "content-collections build",
+		"preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
 		"start": "next start",
 		"test": "vitest run",
 		"test:watch": "vitest",
@@ -52,12 +54,14 @@
 		"@types/node": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
+		"@opennextjs/cloudflare": "^1.20.15",
 		"@vitest/coverage-v8": "catalog:",
 		"dotenv": "catalog:",
 		"mdx": "catalog:",
 		"postcss": "catalog:",
 		"tailwindcss": "catalog:",
 		"typescript": "catalog:",
-		"vitest": "catalog:"
+		"vitest": "catalog:",
+		"wrangler": "^4.156.0"
 	}
 }

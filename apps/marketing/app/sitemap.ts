@@ -13,7 +13,7 @@ function localePath(locale: string, path: string): string {
 	return `${prefix}${path}`;
 }
 
-const staticMarketingPages = ["", "/blog", "/changelog"];
+const staticMarketingPages = [""];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const postPaths = getUniqueBasePaths(allPosts);

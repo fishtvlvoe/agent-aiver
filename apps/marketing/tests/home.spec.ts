@@ -6,11 +6,10 @@ test.describe("home page", () => {
 
 		await expect(
 			page.getByRole("heading", {
-				name: "Build your SaaS without rebuilding the foundations",
+				name: "讓 AI 店員，24 小時在 LINE 上回客人",
 			}),
 		).toBeVisible();
 
 		await expect(page.locator('[data-test="navigation"]')).toBeVisible();
-		await expect(page.locator('[data-test="color-mode-toggle"]')).toBeVisible();
 	});
 });

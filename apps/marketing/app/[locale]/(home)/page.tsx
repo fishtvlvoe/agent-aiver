@@ -1,10 +1,6 @@
-import { CtaSection } from "@home/components/CtaSection";
-import { FaqSection } from "@home/components/FaqSection";
 import { FeaturesSection } from "@home/components/FeaturesSection";
 import { HeroSection } from "@home/components/HeroSection";
-import { NewsletterSection } from "@home/components/NewsletterSection";
-import { PricingSection } from "@home/components/PricingSection";
-import { TestimonialsSection } from "@home/components/TestimonialsSection";
+import { StepsSection } from "@home/components/StepsSection";
 import { setRequestLocale } from "next-intl/server";
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
@@ -14,12 +10,8 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 	return (
 		<>
 			<HeroSection />
+			<StepsSection />
 			<FeaturesSection />
-			<TestimonialsSection />
-			<PricingSection />
-			<FaqSection />
-			<CtaSection />
-			<NewsletterSection />
 		</>
 	);
 }

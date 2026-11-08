@@ -3,7 +3,6 @@ import { config } from "@config";
 import { config as i18nConfig } from "@i18n/config";
 import { cn } from "@repo/ui";
 import { ClientProviders } from "@shared/components/ClientProviders";
-import { ConsentBanner } from "@shared/components/ConsentBanner";
 import { ConsentProvider } from "@shared/components/ConsentProvider";
 import { Footer } from "@shared/components/Footer";
 import { NavBar } from "@shared/components/NavBar";
@@ -73,7 +72,6 @@ export default async function MarketingLayout({
 
 								<Footer />
 
-								<ConsentBanner />
 								<AnalyticsScript />
 							</ThemeProvider>
 						</ClientProviders>

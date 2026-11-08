@@ -184,95 +184,48 @@
 	},
 	"home": {
 		"hero": {
-			"new": "最新",
-			"featureBadge": "多租戶驗證、帳單與組織，準備好立即推出",
-			"title": "打造 SaaS，不必重新打造底座",
-			"subtitle": "以正式環境為導向的 Next.js 起始專案，內建驗證、組織、帳單與加速推出所需的 UI 模式。",
-			"getStarted": "開始打造",
-			"documentation": "閱讀文件",
-			"imageAlt": "產品後台預覽",
-			"preview": {
-				"organization": "Acme",
-				"start": "開始",
-				"chatbot": "AI 聊天助理",
-				"organizationSettings": "組織設定",
-				"accountSettings": "帳號設定",
-				"welcome": "歡迎來到這個組織的首頁！",
-				"newClients": "新客戶",
-				"revenue": "營收",
-				"churn": "流失率",
-				"placeholder": "在這裡放入您的內容…",
-				"userName": "Maya Chen",
-				"userEmail": "maya@acme.com"
+			"title": "讓 AI 店員，24 小時在 LINE 上回客人",
+			"subtitle": "把常見問答教給 AIVER，它會用親切的口吻，在您的官方 LINE 上回覆客人。不確定的問題，它會說「我確認後再回覆你」；客人要真人時，就轉給您。",
+			"login": "登入",
+			"signup": "免費註冊"
+		},
+		"steps": {
+			"title": "三個步驟，開始回覆客人",
+			"items": {
+				"step1": {
+					"title": "連接官方 LINE",
+					"description": "在後台填入您的 LINE 官方帳號資訊，幾分鐘就能連好。"
+				},
+				"step2": {
+					"title": "教它常見問答",
+					"description": "把客人最常問的問題與您的答案放進知識庫，AI 會照您的說法回答。"
+				},
+				"step3": {
+					"title": "開始回覆",
+					"description": "客人傳訊息，AIVER 自動回覆；不確定的問題或想找真人的客人，交給您處理。"
+				}
 			}
 		},
 		"features": {
-			"badge": "產品",
-			"title": "從註冊到成長所需的一切",
-			"description": "為 SaaS 難題提供有主張的預設值，讓團隊專注於客戶願意付費的產品。",
-			"feature1": {
-				"title": "團隊與組織",
-				"subtitle": "邀請成員、管理角色，從第一天起隔離每個工作區。",
-				"description": "內建多租戶結構：建立組織、邀請團隊，無需自訂基礎架構即可切換情境。",
-				"benefit1": {
-					"title": "依角色控管存取權",
-					"description": "擁有者、管理員與成員一開始就有清楚的權限。"
-				},
-				"benefit2": {
-					"title": "真正可用的邀請",
-					"description": "電子郵件邀請與加入流程為實際入門流程接好，不是展示用功能。"
-				},
-				"benefit3": {
-					"title": "作用中的工作區情境",
-					"description": "使用者可以在組織之間移動，不會失去在產品中的位置。"
-				}
-			},
-			"feature2": {
-				"title": "不礙事的帳單",
-				"subtitle": "搭配清楚方案目錄的訂閱、試用與客戶入口網站。",
-				"description": "設定一次方案，就讓結帳與帳單入口網站處理其餘工作，您可以持續推出產品功能。",
-				"benefit1": {
-					"title": "彈性的方案目錄",
-					"description": "每月、每年與一次性選項都能清楚對應您的定價模型。"
-				},
-				"benefit2": {
-					"title": "不需自訂程式的試用",
-					"description": "讓團隊在承諾前有時間評估。"
-				},
-				"benefit3": {
-					"title": "自行升級方案",
-					"description": "客戶可以從入口網站管理付款方式與方案變更。"
-				}
-			}
-		},
-		"testimonials": {
-			"badge": "客戶",
-			"title": "受到真正推出產品的團隊信任",
-			"description": "推出後，您可以將這些範例引言換成自己的客戶回饋。",
+			"title": "AIVER 幫您做的事",
 			"items": {
-				"item1": {
-					"quote": "我們用一個真正可以延伸的底座，取代了數月的驗證與帳單工作。第一批付費客戶在幾週內上線，而不是幾季後。",
-					"name": "Maya Chen",
-					"role": "Northline 創辦人"
+				"knowledge": {
+					"title": "依知識庫回答",
+					"description": "只根據您教的內容回答，不亂編答案。"
 				},
-				"item2": {
-					"quote": "組織模型符合我們原本的銷售方式。邀請、角色與工作區切換都能直接運作，我們可以把時間花在產品上。",
-					"name": "Jonas Weber",
-					"role": "Latticeworks 技術長"
+				"unsure": {
+					"title": "不確定就先說明",
+					"description": "答不出來的問題不硬答，先告訴客人會再回覆。"
 				},
-				"item3": {
-					"quote": "預設值乾淨、結構清楚，自訂時沒有任何東西阻礙我們。感覺就像資深團隊留下了一個很好的起點。",
-					"name": "Amelia Ortiz",
-					"role": "Harbor Studio 產品主管"
+				"handoff": {
+					"title": "客人要真人就轉人工",
+					"description": "客人一句話就能轉給您，對話不中斷。"
+				},
+				"dashboard": {
+					"title": "後台看對話與用量",
+					"description": "設定 LINE、知識庫、模型與說話風格，隨時查看對話與用量。"
 				}
 			}
-		},
-		"cta": {
-			"badge": "開始使用",
-			"title": "準備好推出下一個版本了嗎？",
-			"description": "從完整的 SaaS 底座開始：驗證、組織、帳單與 UI，接著打造出您的樣子。",
-			"primary": "建立您的帳號",
-			"secondary": "聯絡我們"
 		}
 	},
 	"newsletter": {

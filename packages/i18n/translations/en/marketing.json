@@ -184,95 +184,48 @@
 	},
 	"home": {
 		"hero": {
-			"new": "New",
-			"featureBadge": "Multi-tenant auth, billing, and orgs — ready to ship",
-			"title": "Build your SaaS without rebuilding the foundations",
-			"subtitle": "A production-minded Next.js starter with authentication, organizations, billing, and the UI patterns you need to launch faster.",
-			"getStarted": "Start building",
-			"documentation": "Read the docs",
-			"imageAlt": "Product dashboard preview",
-			"preview": {
-				"organization": "Acme",
-				"start": "Start",
-				"chatbot": "AI Chatbot",
-				"organizationSettings": "Organization settings",
-				"accountSettings": "Account settings",
-				"welcome": "Welcome to the start page of this organization!",
-				"newClients": "New clients",
-				"revenue": "Revenue",
-				"churn": "Churn",
-				"placeholder": "Place your content here...",
-				"userName": "Maya Chen",
-				"userEmail": "maya@acme.com"
+			"title": "An AI shop assistant that replies to your LINE customers 24/7",
+			"subtitle": "Teach AIVER your common questions. It replies to customers on your official LINE account in a friendly tone. If it is unsure, it says it will check and get back to them. When a customer asks for a person, it hands over to you.",
+			"login": "Log in",
+			"signup": "Sign up free"
+		},
+		"steps": {
+			"title": "Three steps to start replying",
+			"items": {
+				"step1": {
+					"title": "Connect your official LINE",
+					"description": "Enter your LINE Official Account details in the admin console. Setup takes a few minutes."
+				},
+				"step2": {
+					"title": "Teach it your common Q&A",
+					"description": "Add the questions customers ask most, with your answers, to the knowledge base. AI answers in your words."
+				},
+				"step3": {
+					"title": "Start replying",
+					"description": "Customers send messages and AIVER replies automatically. Unclear questions or requests for a person come to you."
+				}
 			}
 		},
 		"features": {
-			"badge": "Product",
-			"title": "Everything between signup and scale",
-			"description": "Opinionated defaults for the hard parts of a SaaS — so your team can focus on the product customers pay for.",
-			"feature1": {
-				"title": "Teams and organizations",
-				"subtitle": "Invite members, manage roles, and keep every workspace isolated from day one.",
-				"description": "Multi-tenant structure is built in: create an organization, invite your team, and switch contexts without custom scaffolding.",
-				"benefit1": {
-					"title": "Role-aware access",
-					"description": "Owners, admins, and members get clear permissions out of the box."
-				},
-				"benefit2": {
-					"title": "Invites that work",
-					"description": "Email invitations and join flows are wired for real onboarding, not demos."
-				},
-				"benefit3": {
-					"title": "Active workspace context",
-					"description": "Users move between organizations without losing their place in the product."
-				}
-			},
-			"feature2": {
-				"title": "Billing that stays out of the way",
-				"subtitle": "Subscriptions, trials, and customer portals with a clean plan catalog.",
-				"description": "Configure plans once, then let checkout and billing portals handle the rest while you keep shipping product features.",
-				"benefit1": {
-					"title": "Flexible plan catalog",
-					"description": "Monthly, yearly, and one-time options map cleanly to your pricing model."
-				},
-				"benefit2": {
-					"title": "Trials without custom code",
-					"description": "Give teams time to evaluate before they commit."
-				},
-				"benefit3": {
-					"title": "Self-serve upgrades",
-					"description": "Customers manage payment methods and plan changes from a portal."
-				}
-			}
-		},
-		"testimonials": {
-			"badge": "Customers",
-			"title": "Trusted by teams shipping real products",
-			"description": "Example quotes you can replace with your own customers once you launch.",
+			"title": "What AIVER does for you",
 			"items": {
-				"item1": {
-					"quote": "We replaced months of auth and billing work with a foundation we could actually extend. Our first paying customers were live in weeks, not quarters.",
-					"name": "Maya Chen",
-					"role": "Founder, Northline"
+				"knowledge": {
+					"title": "Answers from your knowledge base",
+					"description": "It only answers from what you taught it. No made-up answers."
 				},
-				"item2": {
-					"quote": "The organization model matched how we already sell. Invites, roles, and workspace switching just worked — we spent our time on the product instead.",
-					"name": "Jonas Weber",
-					"role": "CTO, Latticeworks"
+				"unsure": {
+					"title": "Says so when unsure",
+					"description": "It does not guess. It tells the customer you will get back to them."
 				},
-				"item3": {
-					"quote": "Clean defaults, clear structure, and nothing fighting us when we customized. It feels like a senior team left us a strong starting point.",
-					"name": "Amelia Ortiz",
-					"role": "Product Lead, Harbor Studio"
+				"handoff": {
+					"title": "Hands off to a person on request",
+					"description": "A customer can ask for a person in one message, and the chat moves to you."
+				},
+				"dashboard": {
+					"title": "Chats and usage in one dashboard",
+					"description": "Set up LINE, the knowledge base, the model and tone, and check chats and usage anytime."
 				}
 			}
-		},
-		"cta": {
-			"badge": "Get started",
-			"title": "Ready to ship your next release?",
-			"description": "Start with a complete SaaS foundation — auth, orgs, billing, and UI — then make it yours.",
-			"primary": "Create your account",
-			"secondary": "Talk to us"
 		}
 	},
 	"newsletter": {
