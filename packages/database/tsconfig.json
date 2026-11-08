@@ -1,0 +1,5 @@
+{
+	"extends": "@repo/tsconfig/base.json",
+	"include": ["**/*.ts"],
+	"exclude": ["**/*.test.ts", "dist", "build", "node_modules", "prisma/**/*.ts"]
+}

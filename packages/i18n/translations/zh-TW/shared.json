@@ -1,0 +1,62 @@
+{
+	"pricing": {
+		"badge": "價格",
+		"choosePlan": "選擇方案",
+		"contactSales": "聯絡業務",
+		"description": "簡單、能隨團隊成長的方案。準備好後再升級。",
+		"getStarted": "開始使用",
+		"month": "{count, plural, one {{count} 個月} other {{count} 個月}}",
+		"monthly": "每月",
+		"products": {
+			"basic": {
+				"description": "適合驗證首次發布內容的個人創業者。",
+				"features": {
+					"anotherFeature": "核心產品功能",
+					"limitedSupport": "社群支援"
+				},
+				"title": "基本"
+			},
+			"enterprise": {
+				"description": "依您的組織需求提供量身打造的安全性、支援與條款。",
+				"features": {
+					"enterpriseSupport": "專屬支援",
+					"unlimitedProjects": "不限數量的工作區"
+				},
+				"title": "企業"
+			},
+			"free": {
+				"description": "無承諾地探索產品。",
+				"features": {
+					"anotherFeature": "核心產品功能",
+					"limitedSupport": "社群支援"
+				},
+				"title": "免費"
+			},
+			"lifetime": {
+				"description": "一次付費，隨產品成長持續使用。",
+				"features": {
+					"extendSupport": "優先支援時段",
+					"noRecurringCosts": "無週期性費用"
+				},
+				"title": "終身"
+			},
+			"pro": {
+				"description": "適合跨工作區協作的團隊。",
+				"features": {
+					"anotherFeature": "進階產品功能",
+					"fiveMembers": "最多 5 位成員",
+					"fullSupport": "電子郵件支援"
+				},
+				"title": "專業"
+			}
+		},
+		"purchase": "購買",
+		"recommended": "推薦",
+		"subscribe": "訂閱",
+		"title": "價格",
+		"trialPeriod": "{days} {days, plural, one {天} other {天}} 免費試用",
+		"year": "{count, plural, one {{count} 年} other {{count} 年}}",
+		"yearly": "每年",
+		"perSeat": "席位"
+	}
+}

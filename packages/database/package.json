@@ -1,0 +1,32 @@
+{
+	"name": "@repo/database",
+	"version": "0.0.0",
+	"main": "./index.ts",
+	"types": "./**/.tsx",
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"push": "dotenv -c -e ../../.env -- prisma db push",
+		"migrate": "dotenv -c -e ../../.env -- prisma migrate dev",
+		"studio": "dotenv -c -e ../../.env -- prisma studio",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@opennextjs/cloudflare": "^1.20.15",
+		"@paralleldrive/cuid2": "^3.3.0",
+		"@prisma/adapter-pg": "catalog:",
+		"@prisma/client": "catalog:",
+		"drizzle-orm": "catalog:",
+		"drizzle-zod": "catalog:",
+		"pg": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^5.20261031.1",
+		"@repo/tsconfig": "workspace:*",
+		"@types/node": "catalog:",
+		"dotenv-cli": "catalog:",
+		"drizzle-kit": "catalog:",
+		"prisma": "catalog:",
+		"prisma-zod-generator": "catalog:"
+	}
+}

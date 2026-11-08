@@ -1,0 +1,1 @@
+ALTER TABLE `bot_store` ADD `usePlatformModel` integer DEFAULT false NOT NULL;
