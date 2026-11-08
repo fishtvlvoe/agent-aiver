@@ -57,3 +57,6 @@
 
 ## 2026-11-09 流程已升級為全域
 手機實機冒煙(`scripts/phone-smoke.mjs`)、線上冒煙(`scripts/smoke-live.sh`)、寄信測試、建 repo(private)、CI 與 Workers Builds 自動部署，已整理到全域 `~/.agent-guardrails/flows/cf-saas-ship.md`(dev-flow 規則 55)。本專案只留腳本實例。
+
+## 2026-11-09 底座 PR #12(老魚決定)
+- 關閉底座 `opcos-cf-starter` 的 PR #12(LINE AI 店家機器人後台),保留分支 `product/line-ai-admin`,不刪程式碼。
