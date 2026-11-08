@@ -10,7 +10,7 @@
 
 ## 3. 重設密碼
 
-- [ ] 3.1 完整流程驗證(需求「重設密碼完整流程」)。行為:收信、點連結、改密碼、新密碼可登入。驗證:AgentEmail 收信加 e2e 輸出
+- [x] 3.1 完整流程驗證(需求「重設密碼完整流程」)。行為:收信、點連結、改密碼、新密碼可登入。驗證:`scripts/verify-reset-password.sh`。測到的(2026-11-09,對 `admin.aiver.me`):連結開頭 `https://admin.aiver.me/api/auth/reset-password/`、改密碼回 `status:true`、新密碼登入 200、舊密碼登入 401。還沒驗的:瀏覽器內 `/reset-password` 頁面的操作與外觀(併入 4.1 真人驗收)
 
 ## 4. 真人驗收
 
