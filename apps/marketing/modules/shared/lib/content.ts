@@ -1,3 +1,4 @@
+import { config } from "@repo/i18n";
 import slugify from "slugify";
 
 export type ContentStructureItem = {
@@ -23,7 +24,7 @@ export function getLocalizedDocumentWithFallback<T extends { path: string; local
 	locale: string,
 	options?: { defaultLocale?: string },
 ): T | undefined {
-	const defaultLocale = options?.defaultLocale ?? "en";
+	const defaultLocale = options?.defaultLocale ?? config.defaultLocale;
 
 	const matches = documents.filter((doc) => doc.path === path);
 	if (matches.length === 0) {

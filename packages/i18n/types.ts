@@ -1,7 +1,7 @@
-import type mailMessages from "./translations/en/mail.json";
-import type marketingMessages from "./translations/en/marketing.json";
-import type saasMessages from "./translations/en/saas.json";
-import type sharedMessages from "./translations/en/shared.json";
+import type mailMessages from "./translations/zh-TW/mail.json";
+import type marketingMessages from "./translations/zh-TW/marketing.json";
+import type saasMessages from "./translations/zh-TW/saas.json";
+import type sharedMessages from "./translations/zh-TW/shared.json";
 
 export interface LocaleDefinition {
 	/**
