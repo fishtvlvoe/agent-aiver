@@ -4,6 +4,7 @@ import { setMonthlyLimit } from "./procedures/admin-set-monthly-limit";
 import { setUsePlatformModel } from "./procedures/admin-set-use-platform-model";
 import { bindLine } from "./procedures/bind-line";
 import { createFaq } from "./procedures/create-faq";
+import { createFaqs } from "./procedures/create-faqs";
 import { deleteFaq } from "./procedures/delete-faq";
 import { disconnectCloudflare } from "./procedures/disconnect-cloudflare";
 import { getModelSettings } from "./procedures/get-model-settings";
@@ -24,6 +25,7 @@ export const botRouter = {
 	getWebhookUrl,
 	listFaqs,
 	createFaq,
+	createFaqs,
 	updateFaq,
 	deleteFaq,
 	listConversations,
