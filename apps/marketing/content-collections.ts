@@ -1,5 +1,6 @@
 import { defineCollection, defineConfig } from "@content-collections/core";
 import { compileMDX } from "@content-collections/mdx";
+import { marked } from "marked";
 import rehypeShiki from "@shikijs/rehype";
 import { z } from "zod";
 
@@ -66,11 +67,12 @@ const legalPages = defineCollection({
 		content: z.string(),
 	}),
 	transform: async (document, context) => {
-		const body = await compileMDX(context, document);
+		// Workers 不允許執行期 eval,法律頁改在建置時轉成 HTML
+		const html = await marked.parse(document.content);
 
 		return {
 			...document,
-			body,
+			html,
 			locale: getLocaleFromFilePath(document._meta.filePath),
 			path: sanitizePath(document._meta.path),
 		};
