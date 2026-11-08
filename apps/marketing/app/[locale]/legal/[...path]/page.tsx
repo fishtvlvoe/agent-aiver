@@ -1,4 +1,3 @@
-import { PostContent } from "@blog/components/PostContent";
 import { localeRedirect } from "@i18n/routing";
 import { getAllLegalPagePaths, getLegalPageByPath } from "@legal/lib/pages";
 import { getActivePathFromUrlParam } from "@shared/lib/content";
@@ -39,7 +38,7 @@ export default async function LegalPage(props: { params: Promise<Params> }) {
 		return;
 	}
 
-	const { title, body } = page;
+	const { title, html } = page;
 
 	return (
 		<div className="max-w-3xl py-20 lg:py-28 container">
@@ -49,7 +48,11 @@ export default async function LegalPage(props: { params: Promise<Params> }) {
 				</h1>
 			</div>
 
-			<PostContent content={body} />
+			<div
+				className="prose dark:prose-invert mt-8 max-w-2xl"
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: 內容來自 repo 內的 markdown 檔,建置時轉換
+				dangerouslySetInnerHTML={{ __html: html }}
+			/>
 		</div>
 	);
 }
