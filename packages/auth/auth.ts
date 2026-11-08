@@ -7,7 +7,7 @@ import {
 	getUserByEmail,
 	getUserById,
 } from "@repo/database";
-import { config as i18nConfig, type Locale } from "@repo/i18n";
+import { config as i18nConfig, resolveLocale } from "@repo/i18n";
 import { logger } from "@repo/logs";
 import { sendEmail } from "@repo/mail";
 import { createWelcomeNotification } from "@repo/notifications";
@@ -34,7 +34,7 @@ import { lineLiffPlugin } from "./plugins/line-liff";
 
 const getLocaleFromRequest = (request?: Request) => {
 	const cookies = parseCookies(request?.headers.get("cookie") ?? "");
-	return (cookies[i18nConfig.localeCookieName] as Locale) ?? i18nConfig.defaultLocale;
+	return resolveLocale(cookies[i18nConfig.localeCookieName]);
 };
 
 const appUrl = getBaseUrl(process.env.NEXT_PUBLIC_SAAS_URL, 3000);

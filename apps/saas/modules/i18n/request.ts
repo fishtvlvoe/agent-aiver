@@ -1,4 +1,4 @@
-import { config as i18nConfig } from "@repo/i18n";
+import { config, resolveLocale } from "@repo/i18n";
 import { getRequestConfig } from "next-intl/server";
 import { cookies } from "next/headers";
 
@@ -9,8 +9,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
 	if (!locale) {
 		const cookieStore = await cookies();
-		const localeCookie = cookieStore.get(i18nConfig.localeCookieName);
-		locale = localeCookie?.value ?? i18nConfig.defaultLocale;
+		const localeCookie = cookieStore.get(config.localeCookieName);
+		locale = resolveLocale(localeCookie?.value);
 	}
 
 	return {

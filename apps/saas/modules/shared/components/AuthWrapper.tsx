@@ -4,7 +4,6 @@ import { getTranslations } from "next-intl/server";
 import type { PropsWithChildren } from "react";
 
 import { Footer } from "./Footer";
-import { LocaleSwitch } from "./LocaleSwitch";
 
 export async function AuthWrapper({
 	children,
@@ -22,7 +21,6 @@ export async function AuthWrapper({
 						</a>
 
 						<div className="gap-2 flex items-center justify-end">
-							<LocaleSwitch />
 							<ColorModeToggle
 								modes={["system", "light", "dark"]}
 								labels={{
