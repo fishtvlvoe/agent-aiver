@@ -24,3 +24,8 @@
 - LINE 機器人 Webhook 尚未切到 bot.aiver.me（最後一步，需實測）。
 - 2026-11-08 後續：Pages 專案 `agent-aiver` 已解除 `app.aiver.me` 綁定（專案本身保留）；復原需重綁該網域並重建 CNAME。
 - LINE Webhook 已切到 `https://bot.aiver.me/webhook/fish`，LINE Verify 回 Success。舊網址 `https://agent-aiver.fishandy1213.workers.dev/webhook/fish` 仍可用，可隨時切回。
+
+## 2026-11-08 部署改由 Cloudflare 自己建置
+- 三個 Worker 已用 Builds API 接上 GitHub repo（push main 即建置部署）：首頁 `agent-aiver-web`、後台 `agent-aiver-admin`、機器人 `agent-aiver`（含 D1 遷移）。手動觸發三個建置皆成功。
+- 可重用腳本：`scripts/cf-builds-connect.sh`（一個 Worker 一次呼叫）。
+- GitHub 部署步驟待推送自動上線驗證後才移除，只留 test。
