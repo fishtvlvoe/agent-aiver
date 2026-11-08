@@ -1,0 +1,54 @@
+# Docker Compose configuration for local development
+# Provides PostgreSQL database and SeaweedFS S3-compatible storage
+
+services:
+    postgres:
+        image: postgres:16-alpine
+        container_name: supastarter-postgres
+        restart: unless-stopped
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: supastarter
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    seaweedfs:
+        image: chrislusf/seaweedfs:4.47
+        container_name: supastarter-seaweedfs
+        restart: unless-stopped
+        command:
+            [
+                "mini",
+                "-dir=/data",
+                "-s3.port=9000",
+                "-s3.allowedOrigins=*",
+                "-s3.port.iceberg=0",
+                "-admin.port=9001",
+            ]
+        environment:
+            AWS_ACCESS_KEY_ID: seaweedadmin
+            AWS_SECRET_ACCESS_KEY: seaweedadmin
+            S3_BUCKET: avatars
+        ports:
+            - "9000:9000" # S3 API
+            - "9001:9001" # SeaweedFS Admin UI
+        volumes:
+            - seaweedfs_data:/data
+        healthcheck:
+            test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:9333/cluster/status || exit 1"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+            start_period: 15s
+
+volumes:
+    postgres_data:
+    seaweedfs_data:

@@ -1,0 +1,20 @@
+{
+	"name": "agent-aiver",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"test": "node --test test/",
+		"type-check": "tsc -p tsconfig.json",
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"typescript": "catalog:",
+		"wrangler": "^4.156.0"
+	},
+	"engines": {
+		"node": ">=22"
+	}
+}

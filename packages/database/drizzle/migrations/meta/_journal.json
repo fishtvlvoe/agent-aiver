@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1793522021541,
+      "tag": "0000_clear_red_shift",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793544415508,
+      "tag": "0001_line_liff_token_claim",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793896936293,
+      "tag": "0002_keen_hardball",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793897417804,
+      "tag": "0003_conscious_polaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793898638390,
+      "tag": "0004_bot_store_monthly_limit",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793930784570,
+      "tag": "0005_bot_store_secret_verified",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793935329103,
+      "tag": "0006_bot_store_use_platform_model",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1793990000000,
+      "tag": "0007_bot_store_model_account_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1794000000000,
+      "tag": "0008_bot_store_cf_oauth",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1794100000000,
+      "tag": "0009_bot_store_persona",
+      "breakpoints": true
+    }
+  ]
+}

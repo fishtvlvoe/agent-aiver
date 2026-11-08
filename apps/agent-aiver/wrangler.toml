@@ -1,0 +1,19 @@
+name = "agent-aiver"
+main = "src/index.js"
+# 本機 workerd 最新支援 2026-10-30（同 Cloudflare-Worker-LINE 參考庫）
+compatibility_date = "2026-10-30"
+compatibility_flags = ["nodejs_compat"]
+
+# --- D1 / KV bindings：以下 id 全為 TODO，必須在新的 Cloudflare 帳號建立後填入 ---
+# 禁止沿用參考庫 opcos-cf-starter 的 D1 id 與 FORM_STATE KV id，避免連到舊資料庫。
+[[d1_databases]]
+binding = "DB"
+database_name = "agent-aiver-db"
+database_id = "a6526c36-ba8c-4a6a-a96f-8fa9f29343da"
+# 遷移檔共用底座 packages/database，客服 Worker 不另建一套 bot_* 表
+migrations_dir = "../../packages/database/drizzle/migrations"
+
+[[kv_namespaces]]
+binding = "FORM_STATE" # rate limit 與 platform:model_settings 使用
+id = "20e74ceec5b741e78466d59df9ccb866"
+preview_id = "20e74ceec5b741e78466d59df9ccb866"

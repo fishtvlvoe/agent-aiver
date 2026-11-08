@@ -1,0 +1,1 @@
+ALTER TABLE `bot_store` ADD `lineSecretVerifiedAt` integer;

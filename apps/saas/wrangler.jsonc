@@ -1,0 +1,56 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "opcos-cf-starter",
+	"compatibility_date": "2025-09-01",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"services": [
+		{
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "opcos-cf-starter"
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "opcos-cf-starter",
+			"database_id": "a6526c36-ba8c-4a6a-a96f-8fa9f29343da",
+			"migrations_dir": "../../packages/database/drizzle/migrations"
+		}
+	],
+	// 測試環境：wrangler 的 env 區塊不會繼承 services／d1_databases／assets，必須完整重寫
+	"env": {
+		"preview": {
+			"name": "opcos-cf-starter-preview",
+			"main": ".open-next/worker.js",
+			"compatibility_date": "2025-09-01",
+			"compatibility_flags": ["nodejs_compat"],
+			"assets": {
+				"directory": ".open-next/assets",
+				"binding": "ASSETS"
+			},
+			"services": [
+				{
+					"binding": "WORKER_SELF_REFERENCE",
+					"service": "opcos-cf-starter-preview"
+				}
+			],
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "opcos-cf-starter-preview",
+					"database_id": "a6526c36-ba8c-4a6a-a96f-8fa9f29343da",
+					"migrations_dir": "../../packages/database/drizzle/migrations"
+				}
+			],
+			// preview 不寄真信（RESEND 為隨機值），跳過信箱驗證讓冒煙測試能直接登入
+			"vars": {
+				"AUTH_REQUIRE_EMAIL_VERIFICATION": "false"
+			}
+		}
+	}
+}
