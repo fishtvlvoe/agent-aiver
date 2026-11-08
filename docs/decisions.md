@@ -22,3 +22,5 @@
 - LINE 登入回呼已加 `https://admin.aiver.me/api/auth/callback/line`；實測 LINE 登入成功。
 - 刪除舊 DNS：`app.aiver.me` CNAME → `agent-aiver.pages.dev`（橘雲開）。復原：重建該 CNAME。
 - LINE 機器人 Webhook 尚未切到 bot.aiver.me（最後一步，需實測）。
+- 2026-11-08 後續：Pages 專案 `agent-aiver` 已解除 `app.aiver.me` 綁定（專案本身保留）；復原需重綁該網域並重建 CNAME。
+- LINE Webhook 已切到 `https://bot.aiver.me/webhook/fish`，LINE Verify 回 Success。舊網址 `https://agent-aiver.fishandy1213.workers.dev/webhook/fish` 仍可用，可隨時切回。
