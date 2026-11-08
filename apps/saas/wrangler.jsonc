@@ -4,6 +4,8 @@
 	"name": "agent-aiver-admin",
 	"compatibility_date": "2025-09-01",
 	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": true,
+	"routes": [{ "pattern": "admin.aiver.me", "custom_domain": true }],
 	"assets": {
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"

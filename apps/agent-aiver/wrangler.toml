@@ -3,6 +3,8 @@ main = "src/index.js"
 # 本機 workerd 最新支援 2026-10-30（同 Cloudflare-Worker-LINE 參考庫）
 compatibility_date = "2026-10-30"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+routes = [{ pattern = "bot.aiver.me", custom_domain = true }]
 
 # --- D1 / KV bindings：以下 id 全為 TODO，必須在新的 Cloudflare 帳號建立後填入 ---
 # 禁止沿用參考庫 opcos-cf-starter 的 D1 id 與 FORM_STATE KV id，避免連到舊資料庫。
