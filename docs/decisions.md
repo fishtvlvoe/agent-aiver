@@ -54,3 +54,6 @@
 - 事實:早期我沒問老魚,就把 AIVER 做在 BNI 底下(GitHub `line-ai-saas`、Pages `line-ai-saas`、D1 `line-ai-saas-db-v2`、Worker `line-ai-saas`、本機 `B-產品/products/line-ai-saas`),不是老魚要的獨立產品。後來才改成獨立的 `fishtvlvoe/agent-aiver`。
 - 規則:①建立任何新專案、儲存庫或雲端資源之前,先用一句話跟老魚確認「這是哪個產品、放在哪裡、叫什麼名字」,對不上就不動手。②老魚沒給的網站內容或歸屬,不自己決定;測試階段的小細節(文案、範例資料)才由代理決定。③建立前先查本機與既有專案有沒有現成的,避免重複與誤放。
 - 善後:上面五項誤建資源列在 `aiver-base-cleanup`,逐項刪除前都先問老魚。
+
+## 2026-11-09 流程已升級為全域
+手機實機冒煙(`scripts/phone-smoke.mjs`)、線上冒煙(`scripts/smoke-live.sh`)、寄信測試、建 repo(private)、CI 與 Workers Builds 自動部署，已整理到全域 `~/.agent-guardrails/flows/cf-saas-ship.md`(dev-flow 規則 55)。本專案只留腳本實例。
