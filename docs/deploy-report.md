@@ -93,3 +93,59 @@ Current Version ID: 257d4159-da1d-4534-9518-ef0dec0dc0da
 - 決定第 1 項 GitGuardian 的處理方式（a 或 b）。
 - 決定 preview 是否需要獨立的 D1／KV。
 - 提供 LINE 相關值（若要在 Worker 層設定全域值）。目前 `.env` 沒有。
+
+---
+
+## 4. saas 後台 `agent-aiver-admin` 部署（2026-11-08）
+
+範圍：`apps/saas` 獨立部署到 workers.dev 測試網址，修正 CI 的 saas 部署設定。
+未動：`app.aiver.me` 的 DNS 與 Pages 網域、舊 Worker `line-ai-saas`、既有 D1／KV（沿用 `agent-aiver-db`，未新建）、LINE 後台、main 分支、PR 合併。
+
+### 部署設定
+
+- 網址：`https://agent-aiver-admin.fishandy1213.workers.dev`
+- prod Worker 名稱 `agent-aiver-admin`，preview `agent-aiver-admin-preview`（`apps/saas/wrangler.jsonc`）
+- D1 `database_name` 改為 `agent-aiver-db`，與 prod 同一 id `a6526c36-ba8c-4a6a-a96f-8fa9f29343da`
+- 部署指令：`pnpm --filter saas run deploy`（`pnpm deploy` 是 pnpm 內建指令，會失敗，因此不用）
+
+### Worker secrets（只列名稱）
+
+`BETTER_AUTH_SECRET`、`CREDENTIAL_ENC_KEY`、`LINE_CLIENT_ID`、`LINE_CLIENT_SECRET`、`RESEND_API_KEY`（`wrangler secret list` 確認五項）
+
+- `BETTER_AUTH_SECRET`：`openssl rand -base64 32` 新產
+- `CREDENTIAL_ENC_KEY`：沿用既有值
+- `LINE_CLIENT_ID`／`LINE_CLIENT_SECRET`：來自 `line-ai-saas` 參考檔的 LINE Login 頻道值
+- `RESEND_API_KEY`：佔位值。`packages/mail/provider/resend.ts` 模組載入時需要非空字串，否則建置失敗。**實際不會寄信**
+
+### 部署輸出
+
+```
+Current Version ID: 506c6365-12a9-4840-97bb-ce4b75059f1d
+```
+
+D1 migrations：`wrangler d1 migrations apply` 回報 `No migrations to apply!`（遠端 13 張表、`d1_migrations` 10 筆，前一輪已套用）。
+
+### 線上驗證（curl，實際輸出）
+
+| 測試 | 結果 |
+|---|---|
+| `GET /` | HTTP 307 |
+| `GET /login` | HTTP 200，text/html，59174 bytes，含「LINE 登入」 |
+| `GET /api/health` | HTTP 200，本文 `OK` |
+| `GET /api/auth/get-session`（未登入） | HTTP 200，本文 `null` |
+| `POST /api/auth/sign-in/social` `{"provider":"line"}` | HTTP 200，授權網址 host `access.line.me`，redirect_uri 為 `https://agent-aiver-admin.fishandy1213.workers.dev/api/auth/callback/line`，scope `openid profile email` |
+
+注意：上面最後一項會在 D1 `verification` 表新增一筆 state 記錄。
+
+### CI
+
+- `.github/workflows/deploy.yml` 新增 `deploy-admin` job（needs: test，env 含 `NEXT_PUBLIC_SAAS_URL` 與 `RESEND_API_KEY` 佔位值，run `pnpm --filter saas run deploy`）。Ruby YAML 驗證通過，jobs = test, deploy, deploy-admin。
+- commit `a76aca4 feat: saas 後台改名為 agent-aiver-admin 並新增部署 job`，已推到 `standalone-rebuild`（`9a7e27e..a76aca4`，未 force）。
+- `gh pr checks 1` 最終結果：`test` **pass**（45s，run `42484963144`）；`GitGuardian Security Checks` **pass**。
+
+## 5. saas 後台的未完成／未驗證
+
+1. **LINE 實際登入未驗證**：需在 LINE Developers 後台把 `https://agent-aiver-admin.fishandy1213.workers.dev/api/auth/callback/line` 加入登入頻道的 callback URL。這是禁止自動處理的事項（不改 LINE 後台），需老魚本人操作。
+2. **寄信未啟用**：`RESEND_API_KEY` 為佔位值，註冊驗證信不會寄出。
+3. **`deploy-admin` job 未實跑**：只在 push main 觸發，本次未合併。
+4. **GitGuardian**：前一輪記錄為 fail（commit `dc57f0c` 測試假密碼，incident `39823873`）。本次 `gh pr checks` 顯示 pass，未查明原因變化，未做任何處理。
