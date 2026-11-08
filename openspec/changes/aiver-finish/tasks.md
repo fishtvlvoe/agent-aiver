@@ -6,7 +6,7 @@
 ## 2. 授權與語系(代理自行做)
 
 - [ ] 2.1 在 `admin.aiver.me` 重跑「連接 Cloudflare」(需求「Cloudflare 授權可用」)。行為:授權後回到後台顯示已連接。驗證:Playwright 或實測輸出
-- [ ] 2.2 移除非繁中語系(需求「介面只提供繁體中文」)。行為:缺鍵時顯示繁中。驗證:`pnpm type-check` 與單元測試通過
+- [x] 2.2 移除非繁中語系(需求「介面只提供繁體中文」)。行為:缺鍵時顯示繁中。驗證:`pnpm type-check` 與單元測試通過。測到的(2026-11-09,PR #8):type-check 19/19、單元測試 auth 52、marketing 32、saas 26 全過;cookie 為 en 時 resolveLocale 回 zh-TW(locale-cookie.test.ts 4 例);zh-TW 四個 json 鍵數不少於原英文版(缺鍵 0)。還沒驗的:next build 與 Cloudflare 建置(合併後確認)
 
 ## 3. 重設密碼
 
