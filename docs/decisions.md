@@ -29,3 +29,4 @@
 - 三個 Worker 已用 Builds API 接上 GitHub repo（push main 即建置部署）：首頁 `agent-aiver-web`、後台 `agent-aiver-admin`、機器人 `agent-aiver`（含 D1 遷移）。手動觸發三個建置皆成功。
 - 可重用腳本：`scripts/cf-builds-connect.sh`（一個 Worker 一次呼叫）。
 - GitHub 部署步驟待推送自動上線驗證後才移除，只留 test。
+- 2026-11-08 驗證：合併 PR #3 後，Cloudflare 三個 Worker 皆自動建置成功並上線。GitHub 工作流程改名 test.yml，只留測試；部署全由 Cloudflare 執行。
